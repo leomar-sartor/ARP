@@ -1,5 +1,13 @@
 ﻿using ARP.Infra.Interfaces;
+using ARP.Modules.Empresa.Types;
 using ARP.Service.Modules.Empresa;
+using HotChocolate.Data;
+using HotChocolate.Data.Filters;
+using HotChocolate.Data.Sorting;
+using HotChocolate.Language;
+using HotChocolate.Resolvers;
+using HotChocolate.Types.Pagination;
+using System.Text;
 
 namespace ARP.Modules.Empresa
 {
@@ -22,14 +30,27 @@ namespace ARP.Modules.Empresa
             _empresaService = new EmpresaService(_conexao);
         }
 
-        [GraphQLDescription("Buscar Empresas")]
-        public async Task<List<ARP.Entity.Empresa>> Buscar(string valor)
+        [GraphQLDescription("Buscar Empresas com Paginação, Filtragem e Ordenação")]
+        [UsePaging(IncludeTotalCount = true)] // UsePaging is available in HotChocolate 15.x
+        [UseFiltering] // Habilita filtragem
+        [UseSorting]   // Habilita ordenação
+        public IEnumerable<Entity.Empresa> GetEmpresas(
+            IResolverContext context,
+            [GraphQLType(typeof(EmpresaFilterInput))] IValueNode? filter,
+            [GraphQLType(typeof(EmpresaSortInput))] IValueNode? sort,
+            int? skip = 0,
+            int? take = 10)
         {
-            _logger.Log(LogLevel.Information, "Buscando Empresas");
+            var first = context.ArgumentValue<int?>("first");
+            var after = context.ArgumentValue<string?>("after");
+            var last = context.ArgumentValue<int?>("last");
+            var before = context.ArgumentValue<string?>("before");
 
-            var results = await _empresaService.BuscarTodosFilter();
+            _logger.Log(LogLevel.Information, "Buscando Empresas Paginadas");
 
-            return results;
+            var res = _empresaService.GetEmpresasPaginadas(skip, take, filter, sort);
+
+            return res;
         }
     }
 }

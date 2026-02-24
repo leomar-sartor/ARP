@@ -1,4 +1,5 @@
-﻿using ARP.Service.Modules.Auth;
+﻿using ARP.Modules.Empresa.Types;
+using ARP.Service.Modules.Auth;
 using HotChocolate.Execution.Configuration;
 
 namespace ARP.Modules.Auth
@@ -15,6 +16,7 @@ namespace ARP.Modules.Auth
         {
             builder.AddTypeExtension<AuthQuery>();
             builder.AddTypeExtension<AuthMutation>();
+
             return builder;
         }
     }

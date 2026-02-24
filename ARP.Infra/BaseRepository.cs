@@ -6,9 +6,9 @@ namespace ARP.Infra
 {
     public abstract class BaseRepository<T> : Repository where T : class
     {
-        protected string _table;
-        protected string _tableAlias;
-        protected string _select;
+        public string _table;
+        public string _tableAlias;
+        public string _select;
         public BaseRepository(
             IConexao conexao,
             string table,
@@ -44,10 +44,9 @@ namespace ARP.Infra
         public async Task<IEnumerable<T>> BuscarTodosAsync(IDbTransaction? transaction = null)
             => await _conexao.QueryAsync<T>($"{_select} Where {_tableAlias}.DeletedAt IS NULL", null, transaction);
 
-        public IEnumerable<T> BuscarTodosFilter(SqlBuilder sqlBuilder, int paginaAtual, out int totalLinhas, int? perPage = 10)
+        public IEnumerable<T> BuscarTodosFilter(SqlBuilder.Template template, int paginaAtual, out int totalLinhas, int? perPage = 10)
         {
-            var sql = sqlBuilder.AddTemplate($"{_select} /**innerjoin**/ /**leftjoin**/ /**where**/ /**orderby**/");
-            return _conexao.Query<T>(sql.RawSql, paginaAtual, out totalLinhas, sql.Parameters, perPage);
+            return _conexao.Query<T>(template.RawSql, paginaAtual, out totalLinhas, template.Parameters, perPage);
         }
 
         public async Task<IEnumerable<T>> BuscarTodosFilter(SqlBuilder sqlBuilder)
