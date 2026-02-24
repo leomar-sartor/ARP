@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5084",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CONNECTION_STRING": "Host=ep-delicate-voice-acxpyq07-pooler.sa-east-1.aws.neon.tech;Database=homolog;Username=neondb_owner;Password=npg_8uqNIE7eFhYj",
+        "JWT_KEY": "123abcd429efg589hij693mno57239pqrs258tuc479xyz"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7133;http://localhost:5084",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CONNECTION_STRING": "Host=ep-delicate-voice-acxpyq07-pooler.sa-east-1.aws.neon.tech;Database=homolog;Username=neondb_owner;Password=npg_8uqNIE7eFhYj",
+        "JWT_KEY": "123abcd429efg589hij693mno57239pqrs258tuc479xyz"
+      }
+    }
+  }
+}
