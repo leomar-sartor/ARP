@@ -34,13 +34,25 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
 });
 
-//builder.Services.AddDbContext<Context>(options =>
-//    options.UseNpgsql(
-//       connection
-//    ));
+//builder.Services.AddPooledDbContextFactory<Context>(options =>
+//    options.UseNpgsql(connection));
 
+
+//Logs SQL
 builder.Services.AddPooledDbContextFactory<Context>(options =>
-    options.UseNpgsql(connection));
+{
+    options.UseNpgsql(connection);
+
+    options.EnableSensitiveDataLogging();
+    options.EnableDetailedErrors();
+
+    options.LogTo(Console.WriteLine, LogLevel.Information);
+
+    //Só SQL
+    //options.LogTo(Console.WriteLine,
+    //new[] { DbLoggerCategory.Database.Command.Name },
+    //LogLevel.Information);
+});
 
 
 builder.Services
