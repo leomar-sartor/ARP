@@ -60,7 +60,9 @@ namespace ARP.Modules.Pessoa
             if (pessoa == null)
                 return false;
 
-            context.Pessoas.Remove(pessoa);
+
+            pessoa.DeletedAt = DateTime.UtcNow;
+
             await context.SaveChangesAsync();
 
             return true;

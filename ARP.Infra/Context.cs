@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ARP.Infra;
 
@@ -20,7 +21,20 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
+
         base.OnModelCreating(modelBuilder);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(Base).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder
+                    .Entity(entityType.ClrType)
+                    .HasQueryFilter(
+                        GenerateFilterExpression(entityType.ClrType));
+            }
+        }
 
         modelBuilder.Entity<Empresa>(entity =>
         {
@@ -41,5 +55,13 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
             .HasOne(rt => rt.User)
             .WithMany()
             .HasForeignKey(rt => rt.UserId);
+    }
+
+    private static LambdaExpression GenerateFilterExpression(Type type)
+    {
+        var param = Expression.Parameter(type, "e");
+        var prop = Expression.Property(param, nameof(Base.DeletedAt));
+        var body = Expression.Equal(prop, Expression.Constant(null));
+        return Expression.Lambda(body, param);
     }
 }
