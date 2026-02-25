@@ -12,6 +12,7 @@ namespace ARP.Modules.Empresa
             builder.AddType<EmpresaSortInput>();
             builder.AddTypeExtension<EmpresaQuery>();
             builder.AddTypeExtension<EmpresaMutation>();
+            builder.AddTypeExtension<EmpresaResolvers>();
             return builder;
         }
     }

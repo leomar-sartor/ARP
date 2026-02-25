@@ -1,4 +1,6 @@
-﻿using ARP.Modules.Empresa.Types;
+﻿using ARP.Entity;
+using ARP.Modules.Empresa.Loaders;
+using ARP.Modules.Empresa.Types;
 using ARP.Service.Modules.Empresa;
 using HotChocolate.Language;
 using HotChocolate.Resolvers;
@@ -6,6 +8,7 @@ using HotChocolate.Resolvers;
 namespace ARP.Modules.Empresa
 {
     [ExtendObjectType("Query")]
+    //[ExtendObjectType(typeof(Entity.Empresa))]
     public class EmpresaQuery
     {
         private readonly ILogger<EmpresaQuery> _logger;
@@ -28,17 +31,15 @@ namespace ARP.Modules.Empresa
             int? skip = 0,
             int? take = 10)
         {
-            var empresa = new ARP.Entity.Empresa
+            return new List<Entity.Empresa>
             {
-                RazaoSocial = "",
-                Descricao = ""
+                new Entity.Empresa
+                {
+                    Id = 1,
+                    RazaoSocial = "Teste",
+                    Descricao = "Empresa teste"
+                }
             };
-
-            var lista = new List<Entity.Empresa>() { 
-                empresa
-            };
-                
-            return lista;
         }
     }
 }

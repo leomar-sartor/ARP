@@ -18,6 +18,7 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
+    public DbSet<EmpresaSetor> EmpresaSetores => Set<EmpresaSetor>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,7 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
 
         base.OnModelCreating(modelBuilder);
 
+        // Soft delete global
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(Base).IsAssignableFrom(entityType.ClrType))
@@ -36,6 +38,8 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
             }
         }
 
+
+
         modelBuilder.Entity<Empresa>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -45,11 +49,24 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
                 .HasMaxLength(200);
         });
 
-        //Muitos pra Muitos
-        modelBuilder.Entity<Empresa>()
-           .HasMany(e => e.Setores)
-           .WithMany(s => s.Empresas)
-           .UsingEntity(j => j.ToTable("EmpresaSetor"));
+        //Muitos pra Muitos sem campos
+        //modelBuilder.Entity<Empresa>()
+        //   .HasMany(e => e.Setores)
+        //   .WithMany(s => s.Empresas)
+        //   .UsingEntity(j => j.ToTable("EmpresaSetor"));
+
+        modelBuilder.Entity<EmpresaSetor>()
+        .HasKey(x => new { x.EmpresaId, x.SetorId });
+
+        modelBuilder.Entity<EmpresaSetor>()
+            .HasOne(x => x.Empresa)
+            .WithMany(e => e.EmpresaSetores)
+            .HasForeignKey(x => x.EmpresaId);
+
+        modelBuilder.Entity<EmpresaSetor>()
+            .HasOne(x => x.Setor)
+            .WithMany(s => s.EmpresaSetores)
+            .HasForeignKey(x => x.SetorId);
 
         modelBuilder.Entity<RefreshToken>()
             .HasOne(rt => rt.User)

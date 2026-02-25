@@ -6,7 +6,10 @@
 
         public string Descricao { get; set; } = default!;
 
-        public ICollection<Setor> Setores { get; set; } = new List<Setor>();
+        //public ICollection<Setor> Setores { get; set; } = new List<Setor>();
+
+        public ICollection<Entity.EmpresaSetor> EmpresaSetores { get; set; }
+        = new List<Entity.EmpresaSetor>();
 
     }
 }
