@@ -34,10 +34,13 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
 });
 
-builder.Services.AddDbContext<Context>(options =>
-    options.UseNpgsql(
-       connection
-    ));
+//builder.Services.AddDbContext<Context>(options =>
+//    options.UseNpgsql(
+//       connection
+//    ));
+
+builder.Services.AddPooledDbContextFactory<Context>(options =>
+    options.UseNpgsql(connection));
 
 
 builder.Services

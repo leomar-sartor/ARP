@@ -1,4 +1,5 @@
 ﻿using ARP.Infra;
+using ARP.Modules.Pessoa.DataLoader;
 
 namespace ARP.Modules.Pessoa
 {
@@ -22,5 +23,13 @@ namespace ARP.Modules.Pessoa
         public IQueryable<Entity.Pessoa> GetPessoas(
             [Service] Context context)
             => context.Pessoas.AsQueryable();
+
+        public async Task<Entity.Pessoa?> GetPessoaById(
+        long id,
+        PessoaByIdDataLoader dataLoader,
+        CancellationToken cancellationToken)
+            {
+                return await dataLoader.LoadAsync(id, cancellationToken);
+            }
     }
 }
