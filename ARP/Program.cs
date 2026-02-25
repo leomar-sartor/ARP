@@ -56,13 +56,15 @@ builder.Services
 
 builder.Services
     .AddGraphQLServer()
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting()
     .AddQueryType(d => d.Name("Query"))
     .AddMutationType(d => d.Name("Mutation"))
     .AddAuthorization()
     .AddAuthQueriesAndMutations()
     .AddEmpresaQueriesAndMutations()
-    .AddFiltering()
-    .AddSorting();
+    .AddPessoaQueriesAndMutations();
 
 builder.Logging.AddConsole(options =>
 {

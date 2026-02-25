@@ -12,6 +12,8 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
     {
     }
 
+    public DbSet<Pessoa> Pessoas => Set<Pessoa>();
+
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
