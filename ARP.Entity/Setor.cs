@@ -6,5 +6,7 @@
 
         public string Descricao { get; set; }
 
+        public ICollection<Empresa> Empresas { get; set; } = new List<Empresa>();
+
     }
 }

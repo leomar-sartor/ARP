@@ -1,13 +1,12 @@
-﻿namespace ARP.Entity
+﻿
+using Microsoft.AspNetCore.Identity;
+
+namespace ARP.Entity
 {
-    public class Usuario : Base
+    public class Usuario : IdentityUser<long>
     {
-        public string Cpf { get; set; }
-
-        public string Email { get; set; }
-        public string UserName { get; set; }
-
-        public string Password { get; set; }
+        public long? EmpresaId { get; set; }
+        public string Cpf { get; set; } = default!; 
 
     }
 }

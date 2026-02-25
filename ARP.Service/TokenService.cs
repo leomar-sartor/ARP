@@ -1,5 +1,6 @@
 ﻿using ARP.Entity;
 using ARP.Service.Modules.Auth;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace ARP.Service
 {
-    public class TokenService
+    public static class TokenService
     {
         public static AuthType GenerateToken(Usuario user)
         {
@@ -42,6 +43,28 @@ namespace ARP.Service
             };
 
             return result;
+        }
+
+        public static string GenerateJwt(Usuario user, IConfiguration config)
+        {
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
+
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email ?? "")
+            };
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(15),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

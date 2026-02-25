@@ -6,5 +6,7 @@
 
         public string Descricao { get; set; } = default!;
 
+        public ICollection<Setor> Setores { get; set; } = new List<Setor>();
+
     }
 }

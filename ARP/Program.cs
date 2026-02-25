@@ -1,9 +1,9 @@
+using ARP.Entity;
 using ARP.Infra;
-using ARP.Infra.Extensions;
-using ARP.Infra.Interfaces;
 using ARP.Modules.Auth;
 using ARP.Modules.Empresa;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -22,11 +22,23 @@ var connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? buil
 if (string.IsNullOrWhiteSpace(connection))
     throw new InvalidOperationException("Database connection string is not configured. Set 'CONNECTION_STRING' as an environment variable or in configuration.");
 
+builder.Services
+    .AddIdentity<Usuario, IdentityRole<long>>()
+    .AddEntityFrameworkStores<Context>()
+    .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireUppercase = false;
+});
 
 builder.Services.AddDbContext<Context>(options =>
     options.UseNpgsql(
        connection
     ));
+
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
