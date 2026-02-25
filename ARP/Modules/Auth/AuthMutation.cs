@@ -5,6 +5,8 @@ using ARP.Service;
 using ARP.Service.Modules.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ARP.Modules.Auth
 {
@@ -58,10 +60,10 @@ namespace ARP.Modules.Auth
         }
 
         public async Task<RefreshTokenPayload> RefreshToken(
-    RefreshTokenInput input,
-    [Service] Context context,
-    [Service] UserManager<Usuario> userManager,
-    [Service] IConfiguration config)
+            RefreshTokenInput input,
+            [Service] Context context,
+            [Service] UserManager<Usuario> userManager,
+            [Service] IConfiguration config)
         {
             var storedToken = await context.RefreshTokens
                 .Include(x => x.User)
@@ -101,6 +103,33 @@ namespace ARP.Modules.Auth
                 newAccessToken,
                 newRefreshToken.Token
             );
+        }
+
+        [Authorize]
+        public async Task<LogoutPayload> Logout(
+            ClaimsPrincipal claims,
+            [Service] Context context)
+        {
+            var userIdClaim = claims.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+                return new LogoutPayload(false, "Usuário não identificado");
+
+            var userId = long.Parse(userIdClaim.Value);
+
+            var tokens = await context.RefreshTokens
+                .Where(x => x.UserId == userId && !x.Revoked)
+                .ToListAsync();
+
+            foreach (var token in tokens)
+            {
+                token.Revoked = true;
+                token.RevokedAt = DateTime.UtcNow;
+            }
+
+            await context.SaveChangesAsync();
+
+            return new LogoutPayload(true, "Logout realizado com sucesso");
         }
 
         public async Task<RegisterUserPayload> RegisterUserAsync(
