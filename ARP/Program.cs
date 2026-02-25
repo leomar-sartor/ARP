@@ -4,20 +4,29 @@ using ARP.Infra.Interfaces;
 using ARP.Modules.Auth;
 using ARP.Modules.Empresa;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddTransient<IConexao, Conexao>();
-
 builder.Services.AddAuthModule();
 
-var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? builder.Configuration.GetConnectionString("JWT_KEY"); ;
 if (string.IsNullOrWhiteSpace(jwtKey))
     throw new InvalidOperationException("Environment variable 'JWT_KEY' is not set or is empty. Please set JWT_KEY.");
 
 var key = Encoding.ASCII.GetBytes(jwtKey);
+
+var connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("CONNECTION_STRING");
+if (string.IsNullOrWhiteSpace(connection))
+    throw new InvalidOperationException("Database connection string is not configured. Set 'CONNECTION_STRING' as an environment variable or in configuration.");
+
+
+builder.Services.AddDbContext<Context>(options =>
+    options.UseNpgsql(
+       connection
+    ));
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -61,8 +70,7 @@ var log = app.Logger;
 
 log.LogInformation($"LOG activate");
 
-if (app.Environment.IsDevelopment())
-    app.MigrateDatabase(log, true);
+//if (app.Environment.IsDevelopment())
 
 app.UseDefaultFiles();
 
@@ -82,3 +90,5 @@ app.Run();
 //https://fiyazhasan.work/tag/graphql/page/2/
 //https://github.com/fiyazbinhasan/GraphQLCoreFromScratch
 
+//dotnet ef migrations add InitialCreate --project ARP.Infra --startup-project ARP
+//dotnet ef database update --project ARP.Infra --startup-project ARP

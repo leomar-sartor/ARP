@@ -1,7 +1,6 @@
 <Solution>
   <Project Path="ARP.Entity/ARP.Entity.csproj" Id="9b279a7d-2bbc-45ed-bb1f-9dc8b8870342" />
   <Project Path="ARP.Infra/ARP.Infra.csproj" Id="71dccfcd-c89e-40ee-9cd7-ae944f053d60" />
-  <Project Path="ARP.Repo/ARP.Repo.csproj" Id="79e105b6-24d1-46a3-b5c7-c6855c0fc612" />
   <Project Path="ARP.Service/ARP.Service.csproj" Id="d62ea1f4-ab1c-4046-bd35-bda99dec09c0" />
   <Project Path="ARP/ARP.csproj" />
 </Solution>

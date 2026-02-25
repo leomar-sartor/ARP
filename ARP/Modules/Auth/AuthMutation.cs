@@ -1,5 +1,4 @@
 ﻿using ARP.Service.Modules.Auth;
-using HotChocolate.Authorization;
 
 namespace ARP.Modules.Auth
 {
@@ -7,7 +6,6 @@ namespace ARP.Modules.Auth
     [ExtendObjectType("Mutation")]
     public class AuthMutation
     {
-        private readonly AuthService _authService;
         private readonly ILogger<AuthMutation> _logger;
 
         public AuthMutation(
@@ -15,15 +13,14 @@ namespace ARP.Modules.Auth
             AuthService authService)
         {
             _logger = logger;
-            _authService = authService;
         }
 
         [GraphQLDescription("Registra um novo usuário.")]
-        public async Task<AuthType> RegisterAsync(string username, string password)
+        public async Task<string> RegisterAsync(string username, string password)
         {
             _logger.Log(LogLevel.Information, "Registrando");
 
-            return await _authService.RegisterAsync(username, password);
+            return "teste";
         }
     }
 }

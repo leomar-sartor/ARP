@@ -1,6 +1,4 @@
-﻿using ARP.Infra.Interfaces;
-using ARP.Service.Modules.Empresa;
-using HotChocolate.Authorization;
+﻿using ARP.Service.Modules.Empresa;
 
 namespace ARP.Modules.Empresa
 {
@@ -8,20 +6,13 @@ namespace ARP.Modules.Empresa
     [ExtendObjectType("Mutation")]
     public class EmpresaMutation
     {
-        private readonly IConexao _conexao;
         private readonly ILogger<EmpresaMutation> _logger;
 
-        private readonly EmpresaService _empresaService;
-
         public EmpresaMutation(
-            IConexao conexao,
             ILogger<EmpresaMutation> logger
             )
         {
-            _conexao = conexao;
             _logger = logger;
-
-            _empresaService = new EmpresaService(_conexao);
         }
 
 
@@ -38,8 +29,6 @@ namespace ARP.Modules.Empresa
                 RazaoSocial = nome,
                 Descricao = nome
             };
-
-            await _empresaService.Create(empresa);
 
             return empresa;
         }

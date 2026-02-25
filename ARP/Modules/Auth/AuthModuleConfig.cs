@@ -1,5 +1,4 @@
-﻿using ARP.Modules.Empresa.Types;
-using ARP.Service.Modules.Auth;
+﻿using ARP.Service.Modules.Auth;
 using HotChocolate.Execution.Configuration;
 
 namespace ARP.Modules.Auth

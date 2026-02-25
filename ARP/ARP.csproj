@@ -12,6 +12,10 @@
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.12" />
     <PackageReference Include="HotChocolate.Data" Version="15.1.12" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
     <PackageReference Include="Npgsql" Version="10.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
@@ -24,7 +28,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ARP.Entity\ARP.Entity.csproj" />
     <ProjectReference Include="..\ARP.Infra\ARP.Infra.csproj" />
-    <ProjectReference Include="..\ARP.Repo\ARP.Repo.csproj" />
     <ProjectReference Include="..\ARP.Service\ARP.Service.csproj" />
   </ItemGroup>
 
