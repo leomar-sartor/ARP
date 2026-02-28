@@ -1,0 +1,28 @@
+version: "3.8"
+
+volumes:
+  ArpDb:
+
+services:
+
+  postgres:
+    image: "postgres"
+    container_name: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ArpDb:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=Mudar123
+
+  arpapp: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arpapp
+    ports:
+      - 4290:80
+    environment:
+       - CONNECTION_STRING=Server=postgres;Database=postgres;User Id=postgres;Password=Mudar123;
+    depends_on:
+      - postgres
