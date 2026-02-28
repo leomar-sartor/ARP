@@ -15,7 +15,11 @@ namespace ARP.Service
             var claimsIdentity = new ClaimsIdentity();
 
             var secret = Environment.GetEnvironmentVariable("JWT_KEY");
-            var key = Encoding.ASCII.GetBytes(secret);
+
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new InvalidOperationException("Environment variable 'JWT_KEY' is not set.");
+
+            var key = Encoding.ASCII.GetBytes(s: secret);
 
             var tokenConfig = new SecurityTokenDescriptor
             {
@@ -31,14 +35,14 @@ namespace ARP.Service
             var token = tokenHandler.CreateToken(tokenConfig);
             var tokenString = tokenHandler.WriteToken(token);
 
-            var result =  new AuthType()
+            var result = new AuthType()
             {
                 Token = tokenString,
                 User = new UserType()
                 {
                     Id = user.Id,
-                    Username = user.UserName,
-                    Email = user.Email
+                    Username = user.UserName ?? "",
+                    Email = user.Email ?? ""
                 },
             };
 
@@ -47,6 +51,12 @@ namespace ARP.Service
 
         public static string GenerateJwt(Usuario user, IConfiguration config)
         {
+            int timeToExpireInHour = 8;
+            var envValue = Environment.GetEnvironmentVariable("JWT_EXPIRATION_HOURS");
+            if (!string.IsNullOrWhiteSpace(envValue) &&
+                int.TryParse(envValue, out var parsedValue))
+                timeToExpireInHour = parsedValue;
+
             var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
 
@@ -60,7 +70,7 @@ namespace ARP.Service
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.AddHours(timeToExpireInHour),
                 signingCredentials: credentials
             );
 

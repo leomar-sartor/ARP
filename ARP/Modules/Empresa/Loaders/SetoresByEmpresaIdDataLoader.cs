@@ -13,7 +13,7 @@ namespace ARP.Modules.Empresa.Loaders
             IBatchScheduler scheduler,
             IDbContextFactory<Context> factory,
             DataLoaderOptions? options = null)
-            : base(scheduler, options)
+            : base(scheduler, options ?? new DataLoaderOptions())
         {
             _factory = factory;
         }
@@ -25,11 +25,6 @@ namespace ARP.Modules.Empresa.Loaders
         {
             await using var context =
                 await _factory.CreateDbContextAsync(cancellationToken);
-
-            //var data = await context.EmpresaSetores
-            //    .Where(es => keys.Contains(es.EmpresaId))
-            //    .Include(es => es.Setor)
-            //    .ToListAsync(cancellationToken);
 
             //Projections
             var data = await context.EmpresaSetores

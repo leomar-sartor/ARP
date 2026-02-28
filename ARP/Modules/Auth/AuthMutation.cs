@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ARP.Modules.Auth
 {
-
     [ExtendObjectType("Mutation")]
     public class AuthMutation
     {
@@ -25,38 +24,50 @@ namespace ARP.Modules.Auth
 
         public async Task<LoginPayload> Login(
         LoginInput input,
-        [Service] UserManager<Usuario> userManager,
         [Service] Context context,
+        [Service] UserManager<Usuario> userManager,
         [Service] IConfiguration config)
         {
-            var user = await userManager.FindByEmailAsync(input.Email);
-
-            if (user == null)
-                return new LoginPayload(false, "Usuário não encontrado", null, null);
-
-            var validPassword = await userManager.CheckPasswordAsync(user, input.Password);
-
-            if (!validPassword)
-                return new LoginPayload(false, "Senha inválida", null, null);
-
-            var accessToken = TokenService.GenerateJwt(user, config);
-
-            var refreshToken = new RefreshToken
+            try
             {
-                Token = Guid.NewGuid().ToString(),
-                Expiration = DateTime.UtcNow.AddDays(7),
-                UserId = user.Id
-            };
+                var user = await userManager.FindByEmailAsync(input.Email);
 
-            context.RefreshTokens.Add(refreshToken);
-            await context.SaveChangesAsync();
+                if (user == null)
+                    return new LoginPayload(false, "Usuário não encontrado", null, null);
 
-            return new LoginPayload(
-                true,
-                "Login realizado com sucesso",
-                accessToken,
-                refreshToken.Token
-            );
+                var validPassword = await userManager.CheckPasswordAsync(user, input.Password);
+
+                if (!validPassword)
+                    return new LoginPayload(false, "Senha inválida", null, null);
+
+                var accessToken = TokenService.GenerateJwt(user, config);
+
+                var refreshToken = new RefreshToken
+                {
+                    Token = Guid.NewGuid().ToString(),
+                    Expiration = DateTime.UtcNow.AddDays(7),
+                    UserId = user.Id
+                };
+
+                context.RefreshTokens.Add(refreshToken);
+                await context.SaveChangesAsync();
+
+                return new LoginPayload(
+                    true,
+                    "Login realizado com sucesso",
+                    accessToken,
+                    refreshToken.Token
+                );
+            }
+            catch (Exception e)
+            {
+                return new LoginPayload(
+                        Success: false,
+                        Message: e.Message,
+                        AccessToken: null,
+                        RefreshToken: null
+                    );
+            }
         }
 
         public async Task<RefreshTokenPayload> RefreshToken(

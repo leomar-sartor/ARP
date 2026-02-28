@@ -1,8 +1,6 @@
-﻿using ARP.Service.Modules.Empresa;
-
-namespace ARP.Modules.Empresa
+﻿namespace ARP.Modules.Empresa
 {
-    //[Authorize]
+
     [ExtendObjectType("Mutation")]
     public class EmpresaMutation
     {
@@ -32,6 +30,5 @@ namespace ARP.Modules.Empresa
 
             return empresa;
         }
-
     }
 }

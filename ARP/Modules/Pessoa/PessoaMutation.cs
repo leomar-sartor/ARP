@@ -1,5 +1,4 @@
 ﻿using ARP.Infra;
-using ARP.Modules.Empresa;
 using ARP.Modules.Pessoa.Types;
 
 namespace ARP.Modules.Pessoa
@@ -16,7 +15,7 @@ namespace ARP.Modules.Pessoa
             _logger = logger;
         }
 
-        [GraphQLDescription("Cadastrar Pessoa")]
+        [GraphQLDescription("Cadastrar um nova pessoa")]
         public async Task<Entity.Pessoa> CreatePessoa(
         PessoaInput input,
         [Service] Context context)
@@ -32,7 +31,7 @@ namespace ARP.Modules.Pessoa
             return pessoa;
         }
 
-        [GraphQLDescription("Atualizar Empresa")]
+        [GraphQLDescription("Atualizar uma pessoa existente")]
         public async Task<Entity.Pessoa?> UpdatePessoa(
         long id,
         PessoaInput input,
@@ -50,8 +49,8 @@ namespace ARP.Modules.Pessoa
             return pessoa;
         }
 
-        [GraphQLDescription("Remover pessoa")]
-        public async Task<bool> DeletePessoa(
+        [GraphQLDescription("Remover uma pessoa")]
+        public async Task<bool> RemovePessoa(
         long id,
         [Service] Context context)
         {
@@ -59,7 +58,6 @@ namespace ARP.Modules.Pessoa
 
             if (pessoa == null)
                 return false;
-
 
             pessoa.DeletedAt = DateTime.UtcNow;
 

@@ -5,5 +5,5 @@
         string? Message,
         string? AccessToken,
         string? RefreshToken
-        );
+    );
 }

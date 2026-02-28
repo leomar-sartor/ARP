@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GraphiQL (custom)</title>
+  <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+  <style>
+    html, body, #graphiql { height: 100%; margin: 0; }
+  </style>
+</head>
+<body>
+  <div id="graphiql">Loading GraphiQL…</div>
+
+  <!-- React and GraphiQL UMD builds from unpkg -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/graphiql/graphiql.min.js"></script>
+
+  <script>
+    // Minimal fetcher that posts to the server GraphQL endpoint
+    const graphQLFetcher = async (graphQLParams) => {
+      const resp = await fetch('/graphql', {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(graphQLParams),
+        credentials: 'same-origin'
+      });
+      return resp.json().catch(() => resp.text());
+    };
+
+    // Render GraphiQL WITHOUT the doc-explorer / explorer plugin so it won't generate
+    // operationName signatures for you. This keeps the editor "pure" and avoids
+    // the automatic operationName behavior some explorers exhibit.
+    const element = React.createElement(GraphiQL, { fetcher: graphQLFetcher });
+    ReactDOM.createRoot(document.getElementById('graphiql')).render(element);
+  </script>
+</body>
+</html>

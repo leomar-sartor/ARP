@@ -3,6 +3,7 @@ using ARP.Infra;
 using ARP.Modules.Auth;
 using ARP.Modules.Empresa;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -34,11 +35,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false;
 });
 
-//builder.Services.AddPooledDbContextFactory<Context>(options =>
-//    options.UseNpgsql(connection));
-
-
-//Logs SQL
 builder.Services.AddPooledDbContextFactory<Context>(options =>
 {
     options.UseNpgsql(connection);
@@ -46,14 +42,8 @@ builder.Services.AddPooledDbContextFactory<Context>(options =>
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
 
-    options.LogTo(Console.WriteLine, LogLevel.Information);
-
-    //Só SQL
-    //options.LogTo(Console.WriteLine,
-    //new[] { DbLoggerCategory.Database.Command.Name },
-    //LogLevel.Information);
+    options.LogTo(Console.WriteLine, [DbLoggerCategory.Database.Command.Name], LogLevel.Information);
 });
-
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,11 +85,21 @@ builder.Logging.AddSimpleConsole(options =>
 
 var app = builder.Build();
 
-var log = app.Logger;
+if (app.Environment.IsDevelopment())
+{
+    var log = app.Logger;
+    log.LogInformation($"LOG EXAMPLE");
+}
 
-log.LogInformation($"LOG activate");
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
 
-//if (app.Environment.IsDevelopment())
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedOptions);
 
 app.UseDefaultFiles();
 
@@ -113,11 +113,11 @@ app.MapGraphQL("/graphql");
 
 app.UseGraphQLGraphiQL("/graphiql");
 
+//Rodar Migrations Automaticamente
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Context>();
+    db.Database.Migrate();
+}
+
 app.Run();
-
-//https://chillicream.com/docs/hotchocolate/v13/defining-a-schema/object-types
-//https://fiyazhasan.work/tag/graphql/page/2/
-//https://github.com/fiyazbinhasan/GraphQLCoreFromScratch
-
-//dotnet ef migrations add InitialCreate --project ARP.Infra --startup-project ARP
-//dotnet ef database update --project ARP.Infra --startup-project ARP

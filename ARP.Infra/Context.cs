@@ -6,15 +6,9 @@ using System.Linq.Expressions;
 
 namespace ARP.Infra;
 
-public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
+public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usuario, IdentityRole<long>, long>(options)
 {
-    public Context(DbContextOptions<Context> options)
-        : base(options)
-    {
-    }
-
     public DbSet<Pessoa> Pessoas => Set<Pessoa>();
-
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
@@ -22,8 +16,6 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
-
         base.OnModelCreating(modelBuilder);
 
         // Soft delete global
@@ -38,8 +30,6 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
             }
         }
 
-
-
         modelBuilder.Entity<Empresa>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -48,12 +38,6 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
                 .IsRequired()
                 .HasMaxLength(200);
         });
-
-        //Muitos pra Muitos sem campos
-        //modelBuilder.Entity<Empresa>()
-        //   .HasMany(e => e.Setores)
-        //   .WithMany(s => s.Empresas)
-        //   .UsingEntity(j => j.ToTable("EmpresaSetor"));
 
         modelBuilder.Entity<EmpresaSetor>()
         .HasKey(x => new { x.EmpresaId, x.SetorId });
@@ -72,6 +56,16 @@ public class Context : IdentityDbContext<Usuario, IdentityRole<long>, long>
             .HasOne(rt => rt.User)
             .WithMany()
             .HasForeignKey(rt => rt.UserId);
+
+        //modelBuilder.Entity<Usuario>().ToTable("arp_user");
+        //modelBuilder.Entity<IdentityRole<long>>().ToTable("arp_role");
+        //modelBuilder.Entity<IdentityUserRole<long>>().ToTable("arp_userrole")
+        //    .HasKey(r => new { r.UserId, r.RoleId });
+        //modelBuilder.Entity<IdentityUserClaim<long>>().ToTable("arp_userclaim")
+        //    .HasKey(r => new { r.Id });
+        //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
+        //modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
+        //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

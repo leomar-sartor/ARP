@@ -1,5 +1,5 @@
 ﻿using ARP.Infra;
-using ARP.Modules.Pessoa.DataLoader;
+using ARP.Modules.Pessoa.Loaders;
 
 namespace ARP.Modules.Pessoa
 {
@@ -12,24 +12,31 @@ namespace ARP.Modules.Pessoa
             ILogger<PessoaQuery> logger
             )
         {
-
+            _logger = logger;
         }
 
-        [GraphQLDescription("Buscar Pessoas com Paginação, Filtragem, Projections e Ordenação")]
+        [GraphQLDescription("Buscar pessoas com opções de paginação, filtragem, projections e ordenações")]
         [UsePaging(IncludeTotalCount = true)]
         [UseProjection]
         [UseFiltering]
         [UseSorting]
         public IQueryable<Entity.Pessoa> GetPessoas(
             [Service] Context context)
-            => context.Pessoas.AsQueryable();
+        {
+            _logger.Log(LogLevel.Information, "Exemplo Information");
+            _logger.Log(LogLevel.Warning, "Exemplo Warning");
+            _logger.Log(LogLevel.Error, "Exemplo Error");
+            _logger.Log(LogLevel.Critical, "Exemplo Critical");
+
+            return context.Pessoas.AsQueryable();
+        }
 
         public async Task<Entity.Pessoa?> GetPessoaById(
         long id,
         PessoaByIdDataLoader dataLoader,
         CancellationToken cancellationToken)
-            {
-                return await dataLoader.LoadAsync(id, cancellationToken);
-            }
+        {
+            return await dataLoader.LoadAsync(id, cancellationToken);
+        }
     }
 }

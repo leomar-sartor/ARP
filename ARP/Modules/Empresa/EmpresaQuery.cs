@@ -1,14 +1,10 @@
-﻿using ARP.Entity;
-using ARP.Modules.Empresa.Loaders;
-using ARP.Modules.Empresa.Types;
-using ARP.Service.Modules.Empresa;
+﻿using ARP.Modules.Empresa.Types;
 using HotChocolate.Language;
 using HotChocolate.Resolvers;
 
 namespace ARP.Modules.Empresa
 {
     [ExtendObjectType("Query")]
-    //[ExtendObjectType(typeof(Entity.Empresa))]
     public class EmpresaQuery
     {
         private readonly ILogger<EmpresaQuery> _logger;
@@ -17,13 +13,13 @@ namespace ARP.Modules.Empresa
             ILogger<EmpresaQuery> logger
             )
         {
-
+            _logger = logger;
         }
 
         [GraphQLDescription("Buscar Empresas com Paginação, Filtragem e Ordenação")]
-        [UsePaging(IncludeTotalCount = true)] // UsePaging is available in HotChocolate 15.x
-        [UseFiltering] // Habilita filtragem
-        [UseSorting]   // Habilita ordenação
+        [UsePaging(IncludeTotalCount = true)] 
+        [UseFiltering] 
+        [UseSorting]   
         public IEnumerable<Entity.Empresa> GetEmpresas(
             IResolverContext context,
             [GraphQLType(typeof(EmpresaFilterInput))] IValueNode? filter,

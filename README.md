@@ -1,102 +1,68 @@
-# 🏢 RH APP
+# 🏢 ARP - Sistema de Análise de Riscos Psicossociais
 
-Aplicação REST responsável por proporcionar gestão de eventos e controle de qualidade da JBS. 
+Aplicação Graphql responsável por proporcionar gestão de análise de riscos psicossociais para empresas e colocaboradoes.
 
-## 💻 RODAR PROJETO - DOCKER
+## 💻 RODAR PROJETO 
 
-Temos duas opções aqui. A primeira é rodar diretamente pelo IIS através do Visual Studio, gerando containers auxiliares para LDAP e Postgress, ajustando as configurações.
-A segunda é rodar o comando a seguir, onde tudo está em containers.
+Temos duas opções
+
+1 - DOCKETA primeira é rodar diretamente pelo IIS 
+
+### - DOCKER
 
 ``` 
 docker compose -f docker-compose.yml up -d
   ```
 
-## 🔧 SQL AUXILIAR
+### - IIS
 
-Script prontos para conferir dados:
+Através do Visual Studio
 
-``` 
-select * from tipoevento t
-delete from tipoevento where Id >= 0
 
-select * from evento e  
-delete from evento where Id >= 0
 
-select * from documento d 
-delete from documento where Id >= 0
+## 🛠️ FERRAMENTAS E TECNOLOGIAS 
 
-select * from log
-delete from log where Id >= 0
+Este sistema foi construido na última versão disponível do .Net Core, ou seja, versão 10.
 
-select * from unidade u
-delete from unidade where Id >= 0
+Algumas da bibliotecas utilizadas:
 
-select * from clima c
-delete from clima where Id >= 0
+- Entiti Framework Core com Postgres
+- Identity (Gerenciamento de Usuários e Token)
 
-select * from setor s
-delete from setor where Id >= 0
-
-select * from cluster c
-delete from cluster where Id >= 0
-
-select * from analise a
-delete from analise where Id >= 0
-  ```
-
-## 🛠️ TECNOLOGIAS
-
-Este sistema foi construido na última versão disponível do .Net Core, ou seja, versão 7.
-Em conjunto com este projeto, foram utilizados Nuguets (pacotes de bibliotecas) que auxiliam o sistema a fazer o que se propem, sendo algumas delas:
-
-- Npgsql (Conexão com Postgres)
-- Dapper (Micro ORM)
-- DirectoryServices (Integração com LDAP)
-- IdentityModel (Gerenciamento de Token)
-- AWSSDK.S3 (Amazon Storage S3)
+Banco: Neon
+Servidor: Render
 
 ## ❕ESTRUTURA DO PROJETO
 
-- JBS : Parte Prinicpal do Projeto
-- JBS.Entity : Entidades/ Modelos dos Objetos
-- JBS.Infra : Objetos que auxiliam na conexão, mapeamento de objetos e configurações gerais
-- JBS.Repo : Classe responsáveis por ligar os dados do Banco com as Entidades
-- JBS.Service : Nào é obrigatório seu uso, mas seia o ideal para consumir cenários mais complexos de dados (quando envolvem mais que um repositório, ou regras mais complexas)
+- ARP : Parte Prinicpal do Projeto - Onde existem Querys e Mutations;
+- ARP.Entity : Entidades / Modelos dos Objetos com relação com as tabelas do Bando de Dados;
+- ARP.Infra : Contexto, Migrations e Funcionalidades suportam o projeto;
+- ARP.Service : Não é obrigatório seu uso, mas é o ideal para concentrar a lógica de processamento como regras de negócio;
 
 ## ❗IMPORTANTE SABER
 
-### Sobre Banco de Dados
+### Como Rodar Migrations
 
 <p> Ao subir a aplicação ele cria a base de dados automaticamente, considerando o arquivo create tables.sql dentro da pasta SqlScripts na raiz do projeto.</p> 
 
+//dotnet ef migrations add InitialCreate --project ARP.Infra --startup-project ARP
+//dotnet ef database update --project ARP.Infra --startup-project ARP
+
 ### Sobre Configurações
 
-<p> Existe um arquivo chamado appSettings.json.
+<p> Existe um arquivo chamado launchSettings.json e appSettings.json.
 Esté é responsável por aramazenar dados sensiveis ao projeto
-como Conexão de Banco, Conexão com LDAP, Credenciais S3 Amazon e Chave secreta JWT </p>
+como Conexão de Banco, Chave JWT, Tempo de expiração do token, Credenciais entre outras
+Para o docket utilizase ...</p>
 
-## ☁️ ACESSO AMAZON S3 (Storage)
+## ☁️ ACESSOS
 
-Acesso: [Clique aqui](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fs3.console.aws.amazon.com%2Fs3%2Fbuckets%2Fjbs-api-s3%3FbucketType%3Dgeneral%26prefix%3Dmedias%252F%26region%3Dus-east-1%26state%3DhashArgs%2523%26isauthcode%3Dtrue&client_id=arn%3Aaws%3Aiam%3A%3A015428540659%3Auser%2Fs3&forceMobileApp=0&code_challenge=TgDYXSnMK5b9meWWU-RNGSPB3hi8CeZA5nV5H06nnCE&code_challenge_method=SHA-256) !
+### RENDER - Aplicação
+### NEON - Banco de Dados
 
 ``` 
 Endereço de e-mail do usuário root : leomar_sartor@unochapeco.edu.br
 Senha: Xilindr0
-```
-
-![AWS S3](https://github.com/leomar-sartor/Mentant/blob/main/documentation/CredentialS3.png)
-
-
-## 🔓 LDAP / LOGIN
-
-Por hora está sendo usado um usuário padrão definido em código fonte
-
-
-``` 
-{
-  "UserName": "admin",
-  "Password": "123456"
-}
 ```
 
 ## 🔑 TOKEN
@@ -110,7 +76,7 @@ Padrão JWT
 <p> Existe uma tabela (LOG) responsável por armazenar todos os registros (INSERT, UPDATE, DELETE) ocorrido dentro do sistema, considerando
 ID do uisuário, instrução sql executada e seus paramêtros, também um campo mensagem caso ocorra uma excessão, para agilizar a identificação do problema.</p>
 
-## 🔗 Requests (Swagger e Insomnia)
+## 🔗 QUERYS E MUTATIONS (Insomnia)
 
 A documentação já está disponivel no projeto, vide: 
 
@@ -124,4 +90,40 @@ Ou você pode as utilizar as request do insomnia exportadas [Aqui](https://githu
 ![Arquitetura](https://github.com/leomar-sartor/Mentant/blob/main/documentation/JBS.png)
 
 
-## :shipit: Acha que pode fazer melhor! Provoco você a documentar o negócio aí.
+## :shipit: Não gostou da documentação! Documenta o negócio aí e melhora, assim eu apreendo com você!
+
+
+# OBSERVAÇÕES FINAIS
+
+1 - AUTH
+
+* Token com expiração de 15m;
+* Já existe RefreshToken;
+* Já existe Logout;
+
+2 - CADASTRO EMPRESA
+
+3 - CADASTRO SETOR
+
+4 - EXEMPLO
+
+5 - OUTRAS
+
+* Logs ainda não forma implementados;
+
+Links
+//https://chillicream.com/docs/hotchocolate/v13/defining-a-schema/object-types
+//https://fiyazhasan.work/tag/graphql/page/2/
+//https://github.com/fiyazbinhasan/GraphQLCoreFromScratch
+
+
+QUESTIONARIO VERI
+1 - A;
+2 - C;
+3 - C;
+4 - B;
+5 - A;
+6 - C;
+7 - C;
+8 - C;
+

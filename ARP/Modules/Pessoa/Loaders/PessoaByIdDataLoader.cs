@@ -1,9 +1,7 @@
 ﻿using ARP.Infra;
-using GreenDonut;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
-namespace ARP.Modules.Pessoa.DataLoader
+namespace ARP.Modules.Pessoa.Loaders
 {
     public class PessoaByIdDataLoader : BatchDataLoader<long, Entity.Pessoa>
     {
@@ -13,7 +11,7 @@ namespace ARP.Modules.Pessoa.DataLoader
             IBatchScheduler batchScheduler,
             IDbContextFactory<Context> contextFactory,
             DataLoaderOptions? options = null)
-            : base(batchScheduler, options)
+            : base(batchScheduler, options ?? new DataLoaderOptions())
         {
             _contextFactory = contextFactory;
         }
