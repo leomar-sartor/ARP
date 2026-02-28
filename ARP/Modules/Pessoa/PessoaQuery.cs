@@ -31,6 +31,7 @@ namespace ARP.Modules.Pessoa
             return context.Pessoas.AsQueryable();
         }
 
+        [GraphQLDescription("Buscar por pessoa")]
         public async Task<Entity.Pessoa?> GetPessoaById(
         long id,
         PessoaByIdDataLoader dataLoader,

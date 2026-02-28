@@ -1,6 +1,5 @@
-﻿using ARP.Modules.Empresa.Types;
-using HotChocolate.Language;
-using HotChocolate.Resolvers;
+﻿using ARP.Infra;
+using ARP.Modules.Empresa.Loaders;
 
 namespace ARP.Modules.Empresa
 {
@@ -16,26 +15,27 @@ namespace ARP.Modules.Empresa
             _logger = logger;
         }
 
-        [GraphQLDescription("Buscar Empresas com Paginação, Filtragem e Ordenação")]
-        [UsePaging(IncludeTotalCount = true)] 
+        [GraphQLDescription("Buscar Empresas")]
+        [UsePaging(IncludeTotalCount = true)]
+        [UseProjection]
         [UseFiltering] 
         [UseSorting]   
-        public IEnumerable<Entity.Empresa> GetEmpresas(
-            IResolverContext context,
-            [GraphQLType(typeof(EmpresaFilterInput))] IValueNode? filter,
-            [GraphQLType(typeof(EmpresaSortInput))] IValueNode? sort,
-            int? skip = 0,
-            int? take = 10)
+        public IEnumerable<Entity.Empresa?> GetEmpresas(
+            [Service] Context context
+            )
         {
-            return new List<Entity.Empresa>
-            {
-                new Entity.Empresa
-                {
-                    Id = 1,
-                    RazaoSocial = "Teste",
-                    Descricao = "Empresa teste"
-                }
-            };
+            _logger.Log(LogLevel.Information, "Buscando Empresa(s)");
+
+            return context.Empresas.AsQueryable();
+        }
+
+        [GraphQLDescription("Buscar por empresa")]
+        public async Task<Entity.Empresa?> GetEmpresaById(
+        long id,
+        EmpresaByIdDataLoader dataLoader,
+        CancellationToken cancellationToken)
+        {
+            return await dataLoader.LoadAsync(id, cancellationToken);
         }
     }
 }

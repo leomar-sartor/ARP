@@ -26,6 +26,7 @@ Este sistema foi construido na última versão disponível do .Net Core, ou seja
 
 Algumas da bibliotecas utilizadas:
 
+- GitMoji
 - Entiti Framework Core com Postgres
 - Identity (Gerenciamento de Usuários e Token)
 
@@ -92,6 +93,10 @@ Ou você pode as utilizar as request do insomnia exportadas [Aqui](https://githu
 
 ## :shipit: Não gostou da documentação! Documenta o negócio aí e melhora, assim eu apreendo com você!
 
+# PADRÃO DE COMMITS
+
+Ícone - tipo : descrição
+🔑 - feat : crud de pessoas
 
 # OBSERVAÇÕES FINAIS
 

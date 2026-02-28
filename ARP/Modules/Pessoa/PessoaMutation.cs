@@ -20,15 +20,15 @@ namespace ARP.Modules.Pessoa
         PessoaInput input,
         [Service] Context context)
         {
-            var pessoa = new Entity.Pessoa
+            var entity = new Entity.Pessoa
             {
                 Nome = input.Nome
             };
 
-            context.Pessoas.Add(pessoa);
+            context.Pessoas.Add(entity);
             await context.SaveChangesAsync();
 
-            return pessoa;
+            return entity;
         }
 
         [GraphQLDescription("Atualizar uma pessoa existente")]
@@ -37,16 +37,16 @@ namespace ARP.Modules.Pessoa
         PessoaInput input,
         [Service] Context context)
         {
-            var pessoa = await context.Pessoas.FindAsync(id);
+            var entity = await context.Pessoas.FindAsync(id);
 
-            if (pessoa == null)
+            if (entity == null)
                 return null;
 
-            pessoa.Nome = input.Nome;
+            entity.Nome = input.Nome;
 
             await context.SaveChangesAsync();
 
-            return pessoa;
+            return entity;
         }
 
         [GraphQLDescription("Remover uma pessoa")]
@@ -54,12 +54,12 @@ namespace ARP.Modules.Pessoa
         long id,
         [Service] Context context)
         {
-            var pessoa = await context.Pessoas.FindAsync(id);
+            var entity = await context.Pessoas.FindAsync(id);
 
-            if (pessoa == null)
+            if (entity == null)
                 return false;
 
-            pessoa.DeletedAt = DateTime.UtcNow;
+            entity.DeletedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
 

@@ -1,6 +1,8 @@
-﻿namespace ARP.Modules.Empresa
-{
+﻿using ARP.Infra;
+using ARP.Modules.Empresa.Types;
 
+namespace ARP.Modules.Empresa
+{
     [ExtendObjectType("Mutation")]
     public class EmpresaMutation
     {
@@ -13,22 +15,60 @@
             _logger = logger;
         }
 
-
-        [GraphQLDescription("Cadastrar Empresa")]
-        public async Task<ARP.Entity.Empresa> Cadastrar(string nome)
+        [GraphQLDescription("Cadastra uma nova empresa")]
+        public async Task<ARP.Entity.Empresa> CreateEmpresa(
+            EmpresaInput input,
+            [Service] Context context
+            )
         {
             _logger.Log(LogLevel.Information, "Cadastrando Empresa");
-            _logger.Log(LogLevel.Warning, "Cadastrando Empresa");
-            _logger.Log(LogLevel.Error, "Cadastrando Empresa");
-            _logger.Log(LogLevel.Critical, "Cadastrando Empresa");
 
-            var empresa = new ARP.Entity.Empresa
+            var entity = new Entity.Empresa
             {
-                RazaoSocial = nome,
-                Descricao = nome
+                RazaoSocial = input.RazaoSocial,
+                Descricao = input.Descricao
             };
 
-            return empresa;
+            context.Empresas.Add(entity);
+            await context.SaveChangesAsync();
+
+            return entity;
+        }
+
+        [GraphQLDescription("Atualizar uma empresa existente")]
+        public async Task<Entity.Empresa?> UpdateEmpresa(
+        long id,
+        EmpresaInput input,
+        [Service] Context context)
+        {
+            var entity = await context.Empresas.FindAsync(id);
+
+            if (entity == null)
+                return null;
+
+            entity.RazaoSocial = input.RazaoSocial;
+            entity.Descricao = input.Descricao;
+
+            await context.SaveChangesAsync();
+
+            return entity;
+        }
+
+        [GraphQLDescription("Remover uma empresa")]
+        public async Task<bool> RemoveEmpresa(
+        long id,
+        [Service] Context context)
+        {
+            var entity = await context.Empresas.FindAsync(id);
+
+            if (entity == null)
+                return false;
+
+            entity.DeletedAt = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

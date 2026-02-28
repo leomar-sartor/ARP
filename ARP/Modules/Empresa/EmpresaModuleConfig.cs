@@ -1,5 +1,4 @@
-﻿using ARP.Modules.Empresa.Types;
-using HotChocolate.Execution.Configuration;
+﻿using HotChocolate.Execution.Configuration;
 
 namespace ARP.Modules.Empresa
 {
@@ -8,8 +7,6 @@ namespace ARP.Modules.Empresa
         public static IRequestExecutorBuilder AddEmpresaQueriesAndMutations(this IRequestExecutorBuilder builder)
         {
             builder.AddType<Entity.Empresa>();
-            builder.AddType<EmpresaFilterInput>(); 
-            builder.AddType<EmpresaSortInput>();
             builder.AddTypeExtension<EmpresaQuery>();
             builder.AddTypeExtension<EmpresaMutation>();
             builder.AddTypeExtension<EmpresaResolvers>();
