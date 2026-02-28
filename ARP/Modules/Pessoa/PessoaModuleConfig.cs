@@ -1,7 +1,6 @@
-﻿using ARP.Modules.Pessoa;
-using HotChocolate.Execution.Configuration;
+﻿using HotChocolate.Execution.Configuration;
 
-namespace ARP.Modules.Empresa
+namespace ARP.Modules.Pessoa
 {
     public static class PessoaModuleConfig
     {

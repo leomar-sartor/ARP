@@ -1,5 +1,5 @@
 ﻿namespace ARP.Modules.Pessoa.Types
 {
-    [GraphQLDescription("Nome")]
+    [GraphQLDescription("Dados de entrada para pessoa")]
     public record PessoaInput(string Nome);
 }

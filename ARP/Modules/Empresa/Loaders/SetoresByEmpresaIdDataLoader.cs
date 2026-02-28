@@ -1,11 +1,10 @@
-﻿using ARP.Entity;
-using ARP.Infra;
+﻿using ARP.Infra;
 using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Empresa.Loaders
 {
     public class SetoresByEmpresaIdDataLoader
-    : BatchDataLoader<long, IReadOnlyList<Setor>>
+    : BatchDataLoader<long, IReadOnlyList<Entity.Setor>>
     {
         private readonly IDbContextFactory<Context> _factory;
 
@@ -18,7 +17,7 @@ namespace ARP.Modules.Empresa.Loaders
             _factory = factory;
         }
 
-        protected override async Task<IReadOnlyDictionary<long, IReadOnlyList<Setor>>>
+        protected override async Task<IReadOnlyDictionary<long, IReadOnlyList<Entity.Setor>>>
             LoadBatchAsync(
                 IReadOnlyList<long> keys,
                 CancellationToken cancellationToken)
@@ -40,7 +39,7 @@ namespace ARP.Modules.Empresa.Loaders
                 .GroupBy(es => es.EmpresaId)
                 .ToDictionary(
                     g => g.Key,
-                    g => (IReadOnlyList<Setor>)g
+                    g => (IReadOnlyList<Entity.Setor>)g
                             .Select(es => es.Setor)
                             .ToList());
         }

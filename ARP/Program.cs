@@ -2,6 +2,8 @@ using ARP.Entity;
 using ARP.Infra;
 using ARP.Modules.Auth;
 using ARP.Modules.Empresa;
+using ARP.Modules.Pessoa;
+using ARP.Modules.Setor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -69,6 +71,7 @@ builder.Services
     .AddAuthorization()
     .AddAuthQueriesAndMutations()
     .AddEmpresaQueriesAndMutations()
+    .AddSetorQueriesAndMutations()
     .AddPessoaQueriesAndMutations();
 
 builder.Logging.AddConsole(options =>
@@ -113,7 +116,6 @@ app.MapGraphQL("/graphql");
 
 app.UseGraphQLGraphiQL("/graphiql");
 
-//Rodar Migrations Automaticamente
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<Context>();

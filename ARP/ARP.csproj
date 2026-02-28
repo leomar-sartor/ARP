@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Modules\Setor\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ARP.Entity\ARP.Entity.csproj" />
     <ProjectReference Include="..\ARP.Infra\ARP.Infra.csproj" />
     <ProjectReference Include="..\ARP.Service\ARP.Service.csproj" />
