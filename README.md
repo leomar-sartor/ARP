@@ -11,7 +11,8 @@ Temos duas opções
 ### - DOCKER
 
 ``` 
-docker compose -f docker-compose.yml up -d
+nerdctl build -t arpapp:latest -f .\Dockerfile .
+nerdctl run -p 8080:80 --name=arpappcontainer --env-file .env.example -d arpapp:latest
   ```
 
 ### - IIS

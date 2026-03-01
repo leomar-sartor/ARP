@@ -72,7 +72,8 @@ builder.Services
     .AddAuthQueriesAndMutations()
     .AddEmpresaQueriesAndMutations()
     .AddSetorQueriesAndMutations()
-    .AddPessoaQueriesAndMutations();
+    .AddPessoaQueriesAndMutations()
+    .AllowIntrospection(true);
 
 builder.Logging.AddConsole(options =>
 {
