@@ -110,6 +110,15 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UserCors(builder =>
+{
+    builder.WithOrigins("*")
+           .AllowAnyHeader()
+           .AllowAnyMethod()
+           .AllowCredentials();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -134,6 +134,9 @@ Você pode utilizar as request do insomnia exportadas
 5 - OUTRAS
 
 * Ainda será criado um endpoint para criar empresa com setor;
+* Cors habilitado pra todos - depois rever;
+* Terminar documentação
+* Não coloquei o Authorize ainda;
 
 
 QUESTIONARIO VERI
