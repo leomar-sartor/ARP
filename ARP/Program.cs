@@ -13,6 +13,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(
+    opt => opt.AddPolicy("AllowAll",
+    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod())
+    );
+
 builder.Services.AddAuthModule();
 
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? builder.Configuration.GetConnectionString("JWT_KEY"); ;
@@ -89,6 +94,9 @@ builder.Logging.AddSimpleConsole(options =>
 
 var app = builder.Build();
 
+
+
+
 if (app.Environment.IsDevelopment())
 {
     var log = app.Logger;
@@ -111,13 +119,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UserCors(builder =>
-{
-    builder.WithOrigins("*")
-           .AllowAnyHeader()
-           .AllowAnyMethod()
-           .AllowCredentials();
-});
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
