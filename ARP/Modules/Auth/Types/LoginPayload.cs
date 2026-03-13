@@ -4,6 +4,6 @@
         bool Success,
         string? Message,
         string? AccessToken,
-        string? RefreshToken
+        UserPayload? User
     );
 }

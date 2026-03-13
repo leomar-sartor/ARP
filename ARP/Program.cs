@@ -1,7 +1,9 @@
 using ARP.Entity;
 using ARP.Infra;
+using ARP.Infra.Jobs;
 using ARP.Modules.Auth;
 using ARP.Modules.Empresa;
+using ARP.Modules.Job;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Setor;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,8 +16,14 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(
-    opt => opt.AddPolicy("AllowAll",
-    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod())
+    opt => opt.AddPolicy("AllowAll", policy =>
+        policy
+            .WithOrigins("http://localhost:5173")
+            //.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+        )
     );
 
 builder.Services.AddAuthModule();
@@ -78,7 +86,8 @@ builder.Services
     .AddEmpresaQueriesAndMutations()
     .AddSetorQueriesAndMutations()
     .AddPessoaQueriesAndMutations()
-    .AllowIntrospection(true);
+    .AddJobMutations()
+    .DisableIntrospection(false);
 
 builder.Logging.AddConsole(options =>
 {
@@ -92,12 +101,14 @@ builder.Logging.AddSimpleConsole(options =>
     options.TimestampFormat = "HH:mm:ss ";
 });
 
+builder.Services.AddSingleton<RefreshTokenCleanupJob>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<RefreshTokenCleanupJob>());
+
 var app = builder.Build();
 
+var isDevelopment = app.Environment.IsDevelopment();
 
-
-
-if (app.Environment.IsDevelopment())
+if (isDevelopment)
 {
     var log = app.Logger;
     log.LogInformation($"LOG EXAMPLE");

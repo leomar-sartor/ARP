@@ -70,7 +70,7 @@ namespace ARP.Service
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(timeToExpireInHour),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials
             );
 
