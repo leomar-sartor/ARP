@@ -8,6 +8,7 @@ namespace ARP.Modules.Pessoa
         {
             builder.AddTypeExtension<PessoaQuery>();
             builder.AddTypeExtension<PessoaMutation>();
+            builder.AddTypeExtension<PessoaResolvers>();
             return builder;
         }
     }

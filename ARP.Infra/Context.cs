@@ -9,6 +9,7 @@ namespace ARP.Infra;
 public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usuario, IdentityRole<long>, long>(options)
 {
     public DbSet<Pessoa> Pessoas => Set<Pessoa>();
+    public DbSet<Endereco> Enderecos => Set<Endereco>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
@@ -66,6 +67,12 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
         //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
         //modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
         //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
+
+        //Relacionamento 1:N Example
+        modelBuilder.Entity<Endereco>()
+        .HasOne(e => e.Pessoa)
+        .WithMany(p => p.Enderecos)
+        .HasForeignKey(e => e.PessoaId);
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

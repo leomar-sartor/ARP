@@ -1,4 +1,5 @@
-﻿using ARP.Infra;
+﻿using ARP.Entity;
+using ARP.Infra;
 using ARP.Modules.Pessoa.Types;
 
 namespace ARP.Modules.Pessoa
@@ -24,6 +25,16 @@ namespace ARP.Modules.Pessoa
             {
                 Nome = input.Nome
             };
+
+            foreach (var enderecoInput in input.Enderecos)
+            {
+                entity.Enderecos.Add(new Endereco
+                {
+                    Rua = enderecoInput.Rua,
+                    Cidade = enderecoInput.Cidade,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
 
             context.Pessoas.Add(entity);
             await context.SaveChangesAsync();
