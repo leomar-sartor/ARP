@@ -17,5 +17,14 @@ namespace ARP.Modules.Pessoa
             return await dataLoader.LoadAsync(pessoa.Id, ct)
                    ?? Array.Empty<Endereco>();
         }
+
+        public async Task<IReadOnlyList<Habilidade>> GetHabilidades(
+               [Parent] Entity.Pessoa pessoa,
+               HabilidadesByPessoaIdDataLoader dataLoader,
+               CancellationToken ct)
+        {
+            return await dataLoader.LoadAsync(pessoa.Id, ct)
+                   ?? Array.Empty<Habilidade>();
+        }
     }
 }

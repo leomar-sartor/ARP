@@ -8,8 +8,13 @@ namespace ARP.Infra;
 
 public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usuario, IdentityRole<long>, long>(options)
 {
+    #region Example
     public DbSet<Pessoa> Pessoas => Set<Pessoa>();
     public DbSet<Endereco> Enderecos => Set<Endereco>();
+    public DbSet<Habilidade> Habilidades => Set<Habilidade>();
+    public DbSet<PessoaHabilidade> PessoaHabilidades => Set<PessoaHabilidade>();
+    #endregion
+
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
@@ -68,11 +73,32 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
         //modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
         //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
 
+        #region Example
         //Relacionamento 1:N Example
         modelBuilder.Entity<Endereco>()
         .HasOne(e => e.Pessoa)
         .WithMany(p => p.Enderecos)
         .HasForeignKey(e => e.PessoaId);
+
+        //Garante que dados não dupliquem - Índice único
+        modelBuilder.Entity<Habilidade>()
+            .HasIndex(h => h.Nome)
+            .IsUnique();
+
+        //Relacionamento N:M Example
+        modelBuilder.Entity<PessoaHabilidade>()
+            .HasKey(ph => new { ph.PessoaId, ph.HabilidadeId });
+
+        modelBuilder.Entity<PessoaHabilidade>()
+            .HasOne(ph => ph.Pessoa)
+            .WithMany(p => p.PessoaHabilidades)
+         .HasForeignKey(ph => ph.PessoaId);
+
+        modelBuilder.Entity<PessoaHabilidade>()
+            .HasOne(ph => ph.Habilidade)
+            .WithMany(h => h.PessoaHabilidades)
+            .HasForeignKey(ph => ph.HabilidadeId);
+        #endregion
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

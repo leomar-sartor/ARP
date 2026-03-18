@@ -8,6 +8,9 @@ namespace ARP.Modules.Pessoa.Types
         string Nome,
 
         [GraphQLDescription("Enderecos")]
-        IList<EnderecoInput> Enderecos
+        IList<EnderecoInput> Enderecos,
+
+        [GraphQLDescription("Habilidades")]
+        IList<HabilidadeInput> Habilidades
         );
 }

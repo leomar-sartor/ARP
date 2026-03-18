@@ -1,12 +1,10 @@
 ﻿namespace ARP.Entity
 {
-    public class Pessoa : Base
+    public class Habilidade : Base
     {
         public string Nome { get; set; } = default!;
-        public ICollection<Endereco> Enderecos { get; set; }
-            = new List<Endereco>();
 
         public ICollection<PessoaHabilidade> PessoaHabilidades { get; set; }
-        = new List<PessoaHabilidade>();
+            = new List<PessoaHabilidade>();
     }
 }
