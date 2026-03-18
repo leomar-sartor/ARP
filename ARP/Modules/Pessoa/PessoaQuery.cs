@@ -78,5 +78,36 @@ namespace ARP.Modules.Pessoa
         {
             return await dataLoader.LoadAsync(id, cancellationToken);
         }
+
+        [GraphQLDescription("Teste de Cancelamento de Request")]
+        public async Task<string> TesteCancelamento(CancellationToken ct)
+        {
+            ct.Register(() =>
+            {
+                Console.WriteLine("🔥 TOKEN CANCELADO!");
+            });
+
+            try
+            {
+                var start = "Estou começando";
+
+                for (int i = 0; i < 20; i++)
+                {
+                    Console.WriteLine($"Passo {i}");
+
+                    await Task.Delay(1000, ct);
+                }
+
+                var end = "Terminei";
+
+                return "OK";
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("🚨 CANCELADO ESPERADO!");
+
+                return "Cancelado";
+            }
+        }
     }
 }
