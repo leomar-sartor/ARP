@@ -240,5 +240,26 @@ namespace ARP.Modules.Pessoa
 
             return true;
         }
+
+        public async Task<string> TesteCancelamento(CancellationToken ct)
+        {
+            if (ct.IsCancellationRequested)
+            {
+                Console.WriteLine("🚨 CANCELADO!");
+            }
+
+            var start = "Estou começando";
+
+            for (int i = 0; i < 20; i++)
+            {
+                Console.WriteLine($"Passo {i}");
+
+                await Task.Delay(1000, ct);
+            }
+
+            var end = "Terminei";
+
+            return "OK";
+        }
     }
 }

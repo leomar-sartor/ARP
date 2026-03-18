@@ -1,0 +1,28 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace ARP.Infra.Migrations
+{
+    /// <inheritdoc />
+    public partial class RelacionamentoPessoaHabilidadeComBase2 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: "IX_Habilidades_Nome",
+                table: "Habilidades",
+                column: "Nome",
+                unique: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Habilidades_Nome",
+                table: "Habilidades");
+        }
+    }
+}
