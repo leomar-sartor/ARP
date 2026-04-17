@@ -6,6 +6,7 @@ using ARP.Modules.Empresa;
 using ARP.Modules.Job;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Setor;
+using HotChocolate.Execution;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -76,6 +77,23 @@ builder.Services
 
 builder.Services
     .AddGraphQLServer()
+    .ModifyRequestOptions(opt =>
+    {
+        opt.IncludeExceptionDetails = true;
+        opt.ExecutionTimeout = TimeSpan.FromMinutes(5);
+    })
+    .ModifyCostOptions(options =>
+    {
+        options.MaxFieldCost = 5000;       // seu fieldCost foi 2477 — coloque acima disso
+        options.MaxTypeCost = 5000;
+        options.EnforceCostLimits = true;  // mantém a proteção, só aumenta o limite
+        options.ApplyCostDefaults = true;
+        options.DefaultResolverCost = 10.0;
+    })
+    .ModifyOptions(o =>
+    {
+        o.DefaultResolverStrategy = ExecutionStrategy.Serial;
+    })
     .AddProjections()
     .AddFiltering()
     .AddSorting()

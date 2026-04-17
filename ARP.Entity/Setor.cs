@@ -1,4 +1,6 @@
-﻿namespace ARP.Entity
+﻿//using HotChocolate;
+
+namespace ARP.Entity
 {
     public class Setor : Base
     {
@@ -6,6 +8,7 @@
 
         public string Descricao { get; set; } = default!;
 
+        //[GraphQLIgnore]
         public ICollection<EmpresaSetor> EmpresaSetores { get; set; }
         = new List<EmpresaSetor>();
 

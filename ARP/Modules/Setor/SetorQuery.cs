@@ -1,5 +1,7 @@
 ﻿using ARP.Infra;
 using ARP.Modules.Setor.Loaders;
+using HotChocolate.Language;
+using HotChocolate.Resolvers;
 
 namespace ARP.Modules.Setor
 {
@@ -21,8 +23,27 @@ namespace ARP.Modules.Setor
         [UseFiltering]
         [UseSorting]
         public IQueryable<Entity.Setor> GetSetores(
-            [Service] Context context)
+            [Service] Context context,
+            IResolverContext resolverContext
+            )
         {
+            // Lê os argumentos brutos que chegaram na request
+            var filterArg = resolverContext.ArgumentLiteral<IValueNode>("where");
+            var sortArg = resolverContext.ArgumentLiteral<IValueNode>("order");
+            var firstArg = resolverContext.ArgumentValue<int?>("first");
+            var afterArg = resolverContext.ArgumentValue<string?>("after");
+
+            //ou
+
+            // ← Breakpoint aqui
+            // No Watch Window adicione:
+            // resolverContext.Selection.Arguments
+            // resolverContext.Variables
+
+            _logger.LogInformation(
+            "GetSetores → where: {Filter} | order: {Sort} | first: {First} | after: {After}",
+            filterArg, sortArg, firstArg, afterArg);
+
             _logger.Log(LogLevel.Information, "Buscando setores");
 
             return context.Setores.AsQueryable();
