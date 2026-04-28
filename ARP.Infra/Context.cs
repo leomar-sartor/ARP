@@ -20,6 +20,8 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
     public DbSet<Setor> Setores => Set<Setor>();
     public DbSet<EmpresaSetor> EmpresaSetores => Set<EmpresaSetor>();
 
+    public DbSet<Colaborador> Colaboradores => Set<Colaborador>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -99,6 +101,22 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .WithMany(h => h.PessoaHabilidades)
             .HasForeignKey(ph => ph.HabilidadeId);
         #endregion
+
+
+        modelBuilder.Entity<Colaborador>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<Colaborador>()
+        .HasOne(e => e.Setor)
+        .WithMany(p => p.Colaboradores)
+        .HasForeignKey(e => e.SetorId);
+
+        modelBuilder.Entity<Colaborador>()
+        .HasOne(e => e.Empresa)
+        .WithMany(p => p.Colaboradores)
+        .HasForeignKey(e => e.EmpresaId);
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

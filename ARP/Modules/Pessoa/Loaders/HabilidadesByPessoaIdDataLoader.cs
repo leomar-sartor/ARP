@@ -13,7 +13,7 @@ namespace ARP.Modules.Pessoa.Loaders
             IBatchScheduler scheduler,
             IDbContextFactory<Context> factory,
             DataLoaderOptions? options = null)
-            : base(scheduler, options)
+            : base(scheduler, options: options ?? new DataLoaderOptions())
         {
             _factory = factory;
         }

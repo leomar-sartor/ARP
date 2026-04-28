@@ -12,5 +12,7 @@ namespace ARP.Entity
         public ICollection<EmpresaSetor> EmpresaSetores { get; set; }
         = new List<EmpresaSetor>();
 
+        public ICollection<Colaborador> Colaboradores { get; set; }
+        = new List<Colaborador>();
     }
 }

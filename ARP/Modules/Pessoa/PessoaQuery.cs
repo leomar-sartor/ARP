@@ -90,6 +90,7 @@ namespace ARP.Modules.Pessoa
             try
             {
                 var start = "Estou começando";
+                Console.WriteLine($"{start}");
 
                 for (int i = 0; i < 20; i++)
                 {
@@ -99,6 +100,7 @@ namespace ARP.Modules.Pessoa
                 }
 
                 var end = "Terminei";
+                Console.WriteLine($"{end}");
 
                 return "OK";
             }

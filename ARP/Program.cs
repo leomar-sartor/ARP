@@ -2,6 +2,7 @@ using ARP.Entity;
 using ARP.Infra;
 using ARP.Infra.Jobs;
 using ARP.Modules.Auth;
+using ARP.Modules.Colaborador;
 using ARP.Modules.Empresa;
 using ARP.Modules.Job;
 using ARP.Modules.Pessoa;
@@ -104,6 +105,7 @@ builder.Services
     .AddEmpresaQueriesAndMutations()
     .AddSetorQueriesAndMutations()
     .AddPessoaQueriesAndMutations()
+    .AddColaboradorQueriesAndMutations()
     .AddJobMutations()
     .DisableIntrospection(false);
 

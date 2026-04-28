@@ -9,5 +9,8 @@
         public ICollection<Entity.EmpresaSetor> EmpresaSetores { get; set; }
         = new List<Entity.EmpresaSetor>();
 
+        public ICollection<Colaborador> Colaboradores { get; set; }
+        = new List<Colaborador>();
+
     }
 }
