@@ -22,6 +22,13 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
 
     public DbSet<Colaborador> Colaboradores => Set<Colaborador>();
 
+
+    public DbSet<Convite> Convites => Set<Convite>();
+    public DbSet<Pesquisa> Pesquisas => Set<Pesquisa>();
+    public DbSet<Questao> Questoes => Set<Questao>();
+    public DbSet<QuestaoOpcao> QuestaoOpcoes => Set<QuestaoOpcao>();
+    public DbSet<QuestaoResposta> QuestaoRespostas => Set<QuestaoResposta>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -117,6 +124,61 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
         .HasOne(e => e.Empresa)
         .WithMany(p => p.Colaboradores)
         .HasForeignKey(e => e.EmpresaId);
+
+        //Pesquisa
+
+        modelBuilder.Entity<Convite>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<Convite>()
+            .HasIndex(x => x.Token).IsUnique();
+
+        modelBuilder.Entity<Pesquisa>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<Questao>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<QuestaoOpcao>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<QuestaoResposta>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<Convite>()
+           .HasOne(e => e.Pesquisa)
+           .WithMany(p => p.Convites)
+           .HasForeignKey(e => e.PesquisaId);
+
+        modelBuilder.Entity<Questao>()
+          .HasOne(e => e.Pesquisa)
+          .WithMany(p => p.Questoes)
+          .HasForeignKey(e => e.PesquisaId);
+
+        modelBuilder.Entity<QuestaoOpcao>()
+           .HasOne(q => q.Questao)
+           .WithMany(q => q.Opcoes)
+           .HasForeignKey(q => q.QuestaoId);
+
+        modelBuilder.Entity<QuestaoResposta>()
+            .HasOne(x => x.Questao)
+            .WithMany(x => x.Respostas)
+            .HasForeignKey(x => x.QuestaoId);
+
+        modelBuilder.Entity<QuestaoResposta>()
+            .HasOne(x => x.QuestaoOpcao)
+            .WithMany()
+            .HasForeignKey(x => x.QuestaoOpcaoId);
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

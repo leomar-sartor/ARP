@@ -3,6 +3,7 @@ using System;
 using ARP.Infra;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ARP.Infra.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20260429175550_Pesquisa")]
+    partial class Pesquisa
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,7 +118,7 @@ namespace ARP.Infra.Migrations
                     b.HasIndex("Token")
                         .IsUnique();
 
-                    b.ToTable("Convites");
+                    b.ToTable("Convite");
                 });
 
             modelBuilder.Entity("ARP.Entity.Empresa", b =>
@@ -284,7 +287,7 @@ namespace ARP.Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pesquisas");
+                    b.ToTable("Pesquisa");
                 });
 
             modelBuilder.Entity("ARP.Entity.Pessoa", b =>
@@ -389,7 +392,7 @@ namespace ARP.Infra.Migrations
 
                     b.HasIndex("PesquisaId");
 
-                    b.ToTable("Questoes");
+                    b.ToTable("Questao");
                 });
 
             modelBuilder.Entity("ARP.Entity.QuestaoOpcao", b =>
@@ -426,7 +429,7 @@ namespace ARP.Infra.Migrations
 
                     b.HasIndex("QuestaoId");
 
-                    b.ToTable("QuestaoOpcoes");
+                    b.ToTable("QuestaoOpcao");
                 });
 
             modelBuilder.Entity("ARP.Entity.QuestaoResposta", b =>
@@ -468,7 +471,7 @@ namespace ARP.Infra.Migrations
 
                     b.HasIndex("QuestaoOpcaoId");
 
-                    b.ToTable("QuestaoRespostas");
+                    b.ToTable("QuestaoResposta");
                 });
 
             modelBuilder.Entity("ARP.Entity.RefreshToken", b =>

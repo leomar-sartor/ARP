@@ -5,6 +5,7 @@ using ARP.Modules.Auth;
 using ARP.Modules.Colaborador;
 using ARP.Modules.Empresa;
 using ARP.Modules.Job;
+using ARP.Modules.Pesquisa;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Setor;
 using HotChocolate.Execution;
@@ -106,6 +107,7 @@ builder.Services
     .AddSetorQueriesAndMutations()
     .AddPessoaQueriesAndMutations()
     .AddColaboradorQueriesAndMutations()
+    .AddPesquisaQueriesAndMutations()
     .AddJobMutations()
     .DisableIntrospection(false);
 
