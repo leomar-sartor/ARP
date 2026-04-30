@@ -1,9 +1,14 @@
-﻿namespace ARP.Entity
+﻿using ARP.Entity.Enums;
+
+namespace ARP.Entity
 {
     public class Convite : Base
     {
-        public string Token { get; set; } = default!;
-        
+        public string Token { get; set; } = Guid.NewGuid().ToString("N");
+
+        public long ColaboradorId { get; set; }
+        public Colaborador Colaborador { get; set; } = default!;
+
         public DateTime EnviadoEm { get; set; }
 
         public DateTime IniciadoEm { get; set; }
@@ -13,6 +18,8 @@
         public long PesquisaId { get; set; }
 
         public Pesquisa Pesquisa { get; set; } = default!;
+
+        public Status Status { get; set; } = Status.Pendente;
 
     }
 }

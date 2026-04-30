@@ -2,6 +2,7 @@
 using ARP.Modules.Pesquisa.Types;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Pessoa.Types;
+using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Pesquisa
 {
@@ -68,6 +69,87 @@ namespace ARP.Modules.Pesquisa
             await context.SaveChangesAsync();
 
             return entity;
+        }
+
+        [GraphQLDescription("Cadastrar um nova pesquisa")]
+        public async Task<List<Entity.QuestaoResposta>> CreateResposta(
+        RespostaInput input,
+        [Service] Context context)
+        {
+            var respostas = new List<Entity.QuestaoResposta>();
+            var questao = await context.Questoes
+                .Include(q => q.Opcoes)
+                .FirstOrDefaultAsync(q => q.Id == input.QuestaoId);
+
+            if (questao is not null)
+                if (questao.Tipo == Entity.Enums.TipoQuestao.Opcao)
+                {
+                    var opcoesValidas = questao.Opcoes.Select(o => o.Id).ToHashSet();
+
+                    if (input.QuestaoOpcaoIds == null || !input.QuestaoOpcaoIds.Any())
+                    {
+                        throw new ArgumentException("A questão permite múltiplas respostas, portanto é necessário informar as opções selecionadas.");
+                    }
+
+                    if (questao.MultiplasRespostas)
+                    {
+                        foreach (var opcaoId in input.QuestaoOpcaoIds)
+                        {
+                            if (!opcoesValidas.Contains(opcaoId))
+                            {
+                                throw new ArgumentException($"A opção com ID {opcaoId} não é válida para a questão {questao.Titulo}.");
+                            }
+
+                            var resposta = new Entity.QuestaoResposta
+                            {
+                                Token = input.Token,
+                                QuestaoId = input.QuestaoId,
+                                QuestaoOpcaoId = opcaoId
+                            };
+
+                            respostas.Add(resposta);
+                            context.QuestaoRespostas.Add(resposta);
+                        }
+                    }
+
+                    if (questao.MultiplasRespostas == false)
+                    {
+                        if (input.QuestaoOpcaoIds.Length > 1)
+                        {
+                            throw new ArgumentException("A questão permite apenas uma resposta.");
+                        }
+
+                        var resposta = new Entity.QuestaoResposta
+                        {
+                            Token = input.Token,
+                            QuestaoId = input.QuestaoId,
+                            QuestaoOpcaoId = input.QuestaoOpcaoIds.First()
+                        };
+
+                        respostas.Add(resposta);
+                        context.QuestaoRespostas.Add(resposta);
+
+
+                    }
+
+                }
+                else if (questao.Tipo == Entity.Enums.TipoQuestao.Texto)
+                {
+                    var resposta = new Entity.QuestaoResposta
+                    {
+                        Token = input.Token,
+                        QuestaoId = input.QuestaoId,
+                        TextoResposta = input.TextoResposta
+                    };
+
+                    respostas.Add(resposta);
+                    context.QuestaoRespostas.Add(resposta);
+                }
+
+
+            await context.SaveChangesAsync();
+
+            return respostas;
         }
     }
 }

@@ -4,6 +4,7 @@ namespace ARP.Entity
 {
     public class Questao : Base
     {
+        public int Ordem { get; set; }
         public string Titulo { get; set; } = default!;
 
         public TipoQuestao Tipo { get; set; }
