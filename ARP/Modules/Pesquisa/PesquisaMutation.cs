@@ -256,5 +256,46 @@ namespace ARP.Modules.Pesquisa
             await context.SaveChangesAsync(ct);
             return true;
         }
+
+        [GraphQLDescription("Salvar progresso parcial da pesquisa")]
+        public async Task<bool> AutoSavePesquisa(
+            string token,
+            long ultimaQuestaoRespondidaId,
+            string? respostasParciais,
+            [Service] Context context,
+            CancellationToken ct)
+        {
+            var convite = await context.Convites
+                .FirstOrDefaultAsync(c => c.Token == token, ct)
+                ?? throw new ArgumentException("Token inválido.");
+
+            if (convite.Status == Entity.Enums.Status.Completo)
+                throw new ArgumentException("Pesquisa já concluída.");
+
+            var rascunho = await context.PesquisaRascunhos
+                .FirstOrDefaultAsync(r => r.Token == token, ct);
+
+            if (rascunho is null)
+            {
+                rascunho = new Entity.PesquisaRascunho
+                {
+                    Token = token,
+                    PesquisaId = convite.PesquisaId,
+                    UltimaQuestaoRespondidaId = ultimaQuestaoRespondidaId,
+                    RespostasParciais = respostasParciais,
+                    UltimaAtualizacao = DateTime.UtcNow
+                };
+                context.PesquisaRascunhos.Add(rascunho);
+            }
+            else
+            {
+                rascunho.UltimaQuestaoRespondidaId = ultimaQuestaoRespondidaId;
+                rascunho.RespostasParciais = respostasParciais;
+                rascunho.UltimaAtualizacao = DateTime.UtcNow;
+            }
+
+            await context.SaveChangesAsync(ct);
+            return true;
+        }
     }
 }
