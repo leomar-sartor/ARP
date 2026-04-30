@@ -71,11 +71,32 @@ namespace ARP.Modules.Pesquisa
             return entity;
         }
 
-        [GraphQLDescription("Cadastrar um nova pesquisa")]
+        [GraphQLDescription("Cadastrar uma resposta")]
         public async Task<List<Entity.QuestaoResposta>> CreateResposta(
         RespostaInput input,
         [Service] Context context)
         {
+            // Valida se o token é de um convite válido e não concluído
+            var convite = await context.Convites
+                .Include(c => c.Pesquisa)
+                .FirstOrDefaultAsync(c => c.Token == input.Token);
+
+            if (convite is null)
+                throw new ArgumentException("Token inválido.");
+
+            if (convite.Status == Entity.Enums.Status.Completo)
+                throw new ArgumentException("Esta pesquisa já foi respondida.");
+
+            if (DateTime.UtcNow > convite.Pesquisa.DataFinal)
+                throw new ArgumentException("O prazo para responder esta pesquisa encerrou.");
+
+            // Marca como em progresso se ainda pendente
+            if (convite.Status == Entity.Enums.Status.Pendente)
+            {
+                convite.Status = Entity.Enums.Status.EmProgresso;
+                convite.IniciadoEm = DateTime.UtcNow;
+            }
+
             var respostas = new List<Entity.QuestaoResposta>();
             var questao = await context.Questoes
                 .Include(q => q.Opcoes)
@@ -150,6 +171,90 @@ namespace ARP.Modules.Pesquisa
             await context.SaveChangesAsync();
 
             return respostas;
+        }
+
+        // Disparar pesquisa para colaboradores
+        [GraphQLDescription("Disparar pesquisa para colaboradores")]
+        public async Task<bool> DispararPesquisa(
+            long pesquisaId,
+            long[] colaboradorIds,
+            [Service] Context context,
+            CancellationToken ct)
+        {
+            var pesquisa = await context.Pesquisas
+                .FirstOrDefaultAsync(p => p.Id == pesquisaId, ct)
+                ?? throw new ArgumentException("Pesquisa não encontrada.");
+
+            foreach (var colaboradorId in colaboradorIds)
+            {
+                // Evita duplicata: um colaborador não recebe 2 convites para a mesma pesquisa
+                var jaExiste = await context.Convites
+                    .AnyAsync(c => c.ColaboradorId == colaboradorId
+                                && c.PesquisaId == pesquisaId, ct);
+                if (jaExiste) continue;
+
+                var convite = new Entity.Convite
+                {
+                    Token = Guid.NewGuid().ToString("N"),
+                    ColaboradorId = colaboradorId,
+                    PesquisaId = pesquisaId,
+                    EnviadoEm = DateTime.UtcNow,
+                    Status = Entity.Enums.Status.Pendente
+                };
+                context.Convites.Add(convite);
+            }
+
+            await context.SaveChangesAsync(ct);
+            return true;
+        }
+
+        // Retomar ou iniciar pesquisa pelo token
+        [GraphQLDescription("Buscar progresso da pesquisa pelo token do convite")]
+        public async Task<PesquisaSessaoPayload> GetSessaoPesquisa(
+            string token,
+            [Service] Context context,
+            CancellationToken ct)
+        {
+            var convite = await context.Convites
+                .Include(c => c.Pesquisa).ThenInclude(p => p.Questoes).ThenInclude(q => q.Opcoes)
+                .FirstOrDefaultAsync(c => c.Token == token, ct)
+                ?? throw new ArgumentException("Token inválido.");
+
+            if (convite.Status == Entity.Enums.Status.Completo)
+                throw new ArgumentException("Pesquisa já concluída.");
+
+            var rascunho = await context.PesquisaRascunhos
+                .FirstOrDefaultAsync(r => r.Token == token, ct);
+
+            return new PesquisaSessaoPayload(
+                Pesquisa: convite.Pesquisa,
+                UltimaQuestaoRespondidaId: rascunho?.UltimaQuestaoRespondidaId,
+                RespostasParciais: rascunho?.RespostasParciais
+            );
+        }
+
+        // Finalizar pesquisa
+        [GraphQLDescription("Finalizar pesquisa e registrar conclusão")]
+        public async Task<bool> FinalizarPesquisa(
+            string token,
+            [Service] Context context,
+            CancellationToken ct)
+        {
+            var convite = await context.Convites
+                .FirstOrDefaultAsync(c => c.Token == token, ct)
+                ?? throw new ArgumentException("Token inválido.");
+
+            convite.Status = Entity.Enums.Status.Completo;
+            convite.ConcluidoEm = DateTime.UtcNow;
+
+            // Remove o rascunho
+            var rascunho = await context.PesquisaRascunhos
+                .FirstOrDefaultAsync(r => r.Token == token, ct);
+            if (rascunho is not null)
+                context.PesquisaRascunhos.Remove(rascunho);
+
+            await context.SaveChangesAsync(ct);
+            return true;
         }
     }
 }

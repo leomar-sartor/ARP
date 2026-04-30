@@ -29,6 +29,8 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
     public DbSet<QuestaoOpcao> QuestaoOpcoes => Set<QuestaoOpcao>();
     public DbSet<QuestaoResposta> QuestaoRespostas => Set<QuestaoResposta>();
 
+    public DbSet<PesquisaRascunho> PesquisaRascunhos => Set<PesquisaRascunho>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -179,6 +181,17 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .HasOne(x => x.QuestaoOpcao)
             .WithMany()
             .HasForeignKey(x => x.QuestaoOpcaoId);
+
+        modelBuilder.Entity<PesquisaRascunho>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Token).IsUnique();
+        });
+
+        modelBuilder.Entity<PesquisaRascunho>()
+            .HasOne(e => e.Pesquisa)
+            .WithMany()
+            .HasForeignKey(e => e.PesquisaId);
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)
