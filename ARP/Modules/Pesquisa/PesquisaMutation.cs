@@ -208,30 +208,7 @@ namespace ARP.Modules.Pesquisa
             return true;
         }
 
-        // Retomar ou iniciar pesquisa pelo token
-        [GraphQLDescription("Buscar progresso da pesquisa pelo token do convite")]
-        public async Task<PesquisaSessaoPayload> GetSessaoPesquisa(
-            string token,
-            [Service] Context context,
-            CancellationToken ct)
-        {
-            var convite = await context.Convites
-                .Include(c => c.Pesquisa).ThenInclude(p => p.Questoes).ThenInclude(q => q.Opcoes)
-                .FirstOrDefaultAsync(c => c.Token == token, ct)
-                ?? throw new ArgumentException("Token inválido.");
-
-            if (convite.Status == Entity.Enums.Status.Completo)
-                throw new ArgumentException("Pesquisa já concluída.");
-
-            var rascunho = await context.PesquisaRascunhos
-                .FirstOrDefaultAsync(r => r.Token == token, ct);
-
-            return new PesquisaSessaoPayload(
-                Pesquisa: convite.Pesquisa,
-                UltimaQuestaoRespondidaId: rascunho?.UltimaQuestaoRespondidaId,
-                RespostasParciais: rascunho?.RespostasParciais
-            );
-        }
+        
 
         // Finalizar pesquisa
         [GraphQLDescription("Finalizar pesquisa e registrar conclusão")]

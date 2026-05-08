@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ARP.Entity\ARP.Entity.csproj" />
-    <ProjectReference Include="..\ARP.Repo\ARP.Repo.csproj" />
   </ItemGroup>
 
 </Project>

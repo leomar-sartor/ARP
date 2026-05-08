@@ -11,8 +11,10 @@ namespace ARP.Entity
 
         public DateTime EnviadoEm { get; set; }
 
+        //Deixar nulavel
         public DateTime IniciadoEm { get; set; }
 
+        //Deixar nulavel
         public DateTime ConcluidoEm { get; set; }
 
         public long PesquisaId { get; set; }
