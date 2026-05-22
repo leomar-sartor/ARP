@@ -3,6 +3,7 @@
     public class Colaborador : Base
     {
         public string Cpf { get; set; } = default!;
+
         public string Nome { get; set; } = default!;
 
         public string Email { get; set; } = default!;

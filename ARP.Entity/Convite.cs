@@ -6,6 +6,8 @@ namespace ARP.Entity
     {
         public string Token { get; set; } = Guid.NewGuid().ToString("N");
 
+        public string Hash { get; set; } = default!;
+
         public long ColaboradorId { get; set; }
         public Colaborador Colaborador { get; set; } = default!;
 

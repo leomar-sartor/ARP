@@ -8,6 +8,7 @@ using ARP.Modules.Job;
 using ARP.Modules.Pesquisa;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Setor;
+using ARP.Service;
 using HotChocolate.Execution;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -123,6 +124,7 @@ builder.Logging.AddSimpleConsole(options =>
     options.TimestampFormat = "HH:mm:ss ";
 });
 
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddSingleton<RefreshTokenCleanupJob>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<RefreshTokenCleanupJob>());
 

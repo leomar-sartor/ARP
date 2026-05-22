@@ -2,7 +2,13 @@
 using ARP.Modules.Pesquisa.Types;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Pessoa.Types;
+using ARP.Service;
+using ARP.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.Ocsp;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace ARP.Modules.Pesquisa
 {
@@ -185,30 +191,80 @@ namespace ARP.Modules.Pesquisa
                 .FirstOrDefaultAsync(p => p.Id == pesquisaId, ct)
                 ?? throw new ArgumentException("Pesquisa não encontrada.");
 
+            var serviceEmail = new EmailService();
+
             foreach (var colaboradorId in colaboradorIds)
             {
                 // Evita duplicata: um colaborador não recebe 2 convites para a mesma pesquisa
                 var jaExiste = await context.Convites
                     .AnyAsync(c => c.ColaboradorId == colaboradorId
                                 && c.PesquisaId == pesquisaId, ct);
+
+                var colaborador = await context.Colaboradores.FirstAsync(c => c.Id == colaboradorId, ct);
+
                 if (jaExiste) continue;
+
+                var secret = Environment.GetEnvironmentVariable("KEY_HMAC");
+
+                var cpfHash = HashHelper.Generate(colaborador.Cpf, secret);
 
                 var convite = new Entity.Convite
                 {
                     Token = Guid.NewGuid().ToString("N"),
+                    Hash = cpfHash,
                     ColaboradorId = colaboradorId,
                     PesquisaId = pesquisaId,
                     EnviadoEm = DateTime.UtcNow,
                     Status = Entity.Enums.Status.Pendente
                 };
                 context.Convites.Add(convite);
+
+                //Enviar por e-mail
+                await serviceEmail.EnviarEmail(
+                        nomeRemetente: "Remetente",
+                        emailRemetente: "noreply@brgestao.net",
+                        nomeDestinario: colaborador.Nome,
+                        emailDestinario: colaborador.Email,
+                        mensagem: $"http://localhost:5173/survey?token={convite.Token}"
+                    );
+
             }
 
             await context.SaveChangesAsync(ct);
             return true;
         }
 
-        
+        // Disparar pesquisa para colaboradores
+        [GraphQLDescription("Validar a pesquisa por colaborador")]
+        public async Task<bool> ValidatePesquisa(
+            string token,
+            string cpf,
+            [Service] Context context,
+            CancellationToken ct)
+        {
+            var convite = await context.Convites
+                .FirstOrDefaultAsync(x => x.Token == token);
+
+            if (convite == null)
+                throw new Exception("Convite inválido");
+
+            var secret = Environment.GetEnvironmentVariable("KEY_HMAC");
+
+            var cpfHash = HashHelper.Generate(
+                cpf = Regex.Replace(cpf, @"\D", ""),
+                secret
+            );
+
+            var valid = CryptographicOperations.FixedTimeEquals(
+                Convert.FromHexString(convite.Hash),
+                Convert.FromHexString(cpfHash)
+            );
+
+            if (!valid)
+                throw new Exception("CPF inválido");
+
+            return true;
+        }
 
         // Finalizar pesquisa
         [GraphQLDescription("Finalizar pesquisa e registrar conclusão")]
