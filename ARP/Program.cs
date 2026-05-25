@@ -87,8 +87,8 @@ builder.Services
     })
     .ModifyCostOptions(options =>
     {
-        options.MaxFieldCost = 5000;       // seu fieldCost foi 2477 — coloque acima disso
-        options.MaxTypeCost = 5000;
+        options.MaxFieldCost = 15000;       // seu fieldCost foi 2477 — coloque acima disso
+        options.MaxTypeCost = 15000;
         options.EnforceCostLimits = true;  // mantém a proteção, só aumenta o limite
         options.ApplyCostDefaults = true;
         options.DefaultResolverCost = 10.0;
