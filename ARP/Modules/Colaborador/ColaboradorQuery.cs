@@ -20,7 +20,7 @@ namespace ARP.Modules.Colaborador
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public async Task<IQueryable<Entity.Colaborador>> ColaboradoresAsync(
+        public async Task<IQueryable<Entity.Cadastros.Colaborador>> ColaboradoresAsync(
             [Service] Context context)
         {
             var result = context.Colaboradores
@@ -30,7 +30,7 @@ namespace ARP.Modules.Colaborador
         }
 
         [GraphQLDescription("Buscar por colaborador")]
-        public async Task<Entity.Colaborador?> GetColaboradorById(
+        public async Task<Entity.Cadastros.Colaborador?> GetColaboradorById(
         long id,
         ColaboradorByIdDataLoader dataLoader,
         CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-﻿namespace ARP.Entity
+﻿namespace ARP.Entity.Cadastros
 {
     public class Colaborador : Base
     {

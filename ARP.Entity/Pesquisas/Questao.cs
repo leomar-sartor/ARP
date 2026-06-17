@@ -1,6 +1,6 @@
 ﻿using ARP.Entity.Enums;
 
-namespace ARP.Entity
+namespace ARP.Entity.Pesquisas
 {
     public class Questao : Base
     {

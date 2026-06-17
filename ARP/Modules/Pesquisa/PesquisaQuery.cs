@@ -21,7 +21,7 @@ namespace ARP.Modules.Pesquisa
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public async Task<IQueryable<Entity.Pesquisa>> GetPesquisasAsync(
+        public async Task<IQueryable<Entity.Pesquisas.Pesquisa>> GetPesquisasAsync(
             [Service] Context context)
         {
             var result = context.Pesquisas

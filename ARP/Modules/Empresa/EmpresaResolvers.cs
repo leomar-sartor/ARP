@@ -2,19 +2,19 @@
 
 namespace ARP.Modules.Empresa
 {
-    [ExtendObjectType(typeof(Entity.Empresa))]
+    [ExtendObjectType(typeof(Entity.Cadastros.Empresa))]
     public class EmpresaResolvers
     {
-        public async Task<IReadOnlyList<Entity.Setor>> GetSetoresDaEmpresa(
-            [Parent] Entity.Empresa empresa,
+        public async Task<IReadOnlyList<Entity.Cadastros.Setor>> GetSetoresDaEmpresa(
+            [Parent] Entity.Cadastros.Empresa empresa,
             SetoresByEmpresaIdDataLoader dataLoader,
             CancellationToken ct)
         {
             if (empresa is null)
-                return Array.Empty<Entity.Setor>();
+                return Array.Empty<Entity.Cadastros.Setor>();
 
             return await dataLoader.LoadAsync(empresa.Id, ct)
-                   ?? Array.Empty<Entity.Setor>();
+                   ?? Array.Empty<Entity.Cadastros.Setor>();
         }
     }
 }

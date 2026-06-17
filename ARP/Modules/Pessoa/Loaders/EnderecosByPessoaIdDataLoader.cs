@@ -1,4 +1,4 @@
-﻿using ARP.Entity;
+﻿using ARP.Entity.Exemplo;
 using ARP.Infra;
 using Microsoft.EntityFrameworkCore;
 

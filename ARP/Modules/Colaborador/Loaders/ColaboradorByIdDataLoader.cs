@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Colaborador.Loaders
 {
-    public class ColaboradorByIdDataLoader : BatchDataLoader<long, Entity.Colaborador>
+    public class ColaboradorByIdDataLoader : BatchDataLoader<long, Entity.Cadastros.Colaborador>
     {
         private readonly IDbContextFactory<Context> _contextFactory;
 
@@ -16,7 +16,7 @@ namespace ARP.Modules.Colaborador.Loaders
             _contextFactory = contextFactory;
         }
 
-        protected override async Task<IReadOnlyDictionary<long, Entity.Colaborador>> LoadBatchAsync(
+        protected override async Task<IReadOnlyDictionary<long, Entity.Cadastros.Colaborador>> LoadBatchAsync(
            IReadOnlyList<long> keys,
            CancellationToken cancellationToken)
         {

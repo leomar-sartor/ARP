@@ -1,7 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace ARP.Entity
+namespace ARP.Entity.Cadastros
 {
     public class Usuario : IdentityUser<long>
     {

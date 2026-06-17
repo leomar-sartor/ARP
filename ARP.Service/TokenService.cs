@@ -1,4 +1,4 @@
-﻿using ARP.Entity;
+﻿using ARP.Entity.Cadastros;
 using ARP.Service.Modules.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

@@ -1,4 +1,4 @@
-﻿namespace ARP.Entity
+﻿namespace ARP.Entity.Pesquisas
 {
     public class QuestaoResposta : Base
     {

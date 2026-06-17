@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ARP.Modules.Empresa.Loaders
 {
     public class SetoresByEmpresaIdDataLoader
-    : BatchDataLoader<long, IReadOnlyList<Entity.Setor>>
+    : BatchDataLoader<long, IReadOnlyList<Entity.Cadastros.Setor>>
     {
         private readonly IDbContextFactory<Context> _factory;
 
@@ -17,7 +17,7 @@ namespace ARP.Modules.Empresa.Loaders
             _factory = factory;
         }
 
-        protected override async Task<IReadOnlyDictionary<long, IReadOnlyList<Entity.Setor>>>
+        protected override async Task<IReadOnlyDictionary<long, IReadOnlyList<Entity.Cadastros.Setor>>>
             LoadBatchAsync(
                 IReadOnlyList<long> keys,
                 CancellationToken cancellationToken)
@@ -26,22 +26,15 @@ namespace ARP.Modules.Empresa.Loaders
                 await _factory.CreateDbContextAsync(cancellationToken);
 
             //Projections
-            var data = await context.EmpresaSetores
-                .Where(es => keys.Contains(es.EmpresaId))
-                .Select(es => new
-                {
-                    es.EmpresaId,
-                    es.Setor
-                })
+            var setores = await context.Setores
+                .Where(s => keys.Contains(s.EmpresaId))
                 .ToListAsync(cancellationToken);
 
-            return data
-                .GroupBy(es => es.EmpresaId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => (IReadOnlyList<Entity.Setor>)g
-                            .Select(es => es.Setor)
-                            .ToList());
+            return setores
+               .GroupBy(e => e.EmpresaId)
+               .ToDictionary(
+                   g => g.Key,
+                   g => (IReadOnlyList<Entity.Cadastros.Setor>)g.ToList());
         }
     }
 }

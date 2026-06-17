@@ -1,12 +1,9 @@
-﻿using ARP.Infra;
+﻿using ARP.Entity.Pesquisas;
+using ARP.Infra;
 using ARP.Modules.Pesquisa.Types;
-using ARP.Modules.Pessoa;
-using ARP.Modules.Pessoa.Types;
 using ARP.Service;
 using ARP.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -25,11 +22,11 @@ namespace ARP.Modules.Pesquisa
         }
 
         [GraphQLDescription("Cadastrar um nova pesquisa")]
-        public async Task<Entity.Pesquisa> CreatePesquisa(
+        public async Task<Entity.Pesquisas.Pesquisa> CreatePesquisa(
         PesquisaInput input,
         [Service] Context context)
         {
-            var entity = new Entity.Pesquisa
+            var entity = new Entity.Pesquisas.Pesquisa
             {
                 Nome = input.Nome,
                 DataInicial = input.DataInicial,
@@ -43,7 +40,7 @@ namespace ARP.Modules.Pesquisa
 
             foreach (var questaoInput in input.Questoes)
             {
-                var questao = new Entity.Questao
+                var questao = new Entity.Pesquisas.Questao
                 {
                     Titulo = questaoInput.Titulo,
                     Tipo = questaoInput.Tipo,
@@ -57,7 +54,7 @@ namespace ARP.Modules.Pesquisa
                 {
                     foreach (var opcaoInput in questaoInput.Opcoes)
                     {
-                        var opcao = new Entity.QuestaoOpcao
+                        var opcao = new Entity.Pesquisas.QuestaoOpcao
                         {
                             Ordem = opcaoInput.Ordem,
                             Descricao = opcaoInput.Descricao
@@ -78,7 +75,7 @@ namespace ARP.Modules.Pesquisa
         }
 
         [GraphQLDescription("Cadastrar uma resposta")]
-        public async Task<List<Entity.QuestaoResposta>> CreateResposta(
+        public async Task<List<QuestaoResposta>> CreateResposta(
         RespostaInput input,
         [Service] Context context)
         {
@@ -103,7 +100,7 @@ namespace ARP.Modules.Pesquisa
                 convite.IniciadoEm = DateTime.UtcNow;
             }
 
-            var respostas = new List<Entity.QuestaoResposta>();
+            var respostas = new List<QuestaoResposta>();
             var questao = await context.Questoes
                 .Include(q => q.Opcoes)
                 .FirstOrDefaultAsync(q => q.Id == input.QuestaoId);
@@ -127,7 +124,7 @@ namespace ARP.Modules.Pesquisa
                                 throw new ArgumentException($"A opção com ID {opcaoId} não é válida para a questão {questao.Titulo}.");
                             }
 
-                            var resposta = new Entity.QuestaoResposta
+                            var resposta = new Entity.Pesquisas.QuestaoResposta
                             {
                                 Token = input.Token,
                                 QuestaoId = input.QuestaoId,
@@ -146,7 +143,7 @@ namespace ARP.Modules.Pesquisa
                             throw new ArgumentException("A questão permite apenas uma resposta.");
                         }
 
-                        var resposta = new Entity.QuestaoResposta
+                        var resposta = new Entity.Pesquisas.QuestaoResposta
                         {
                             Token = input.Token,
                             QuestaoId = input.QuestaoId,
@@ -162,7 +159,7 @@ namespace ARP.Modules.Pesquisa
                 }
                 else if (questao.Tipo == Entity.Enums.TipoQuestao.Texto)
                 {
-                    var resposta = new Entity.QuestaoResposta
+                    var resposta = new Entity.Pesquisas.QuestaoResposta
                     {
                         Token = input.Token,
                         QuestaoId = input.QuestaoId,
@@ -208,7 +205,7 @@ namespace ARP.Modules.Pesquisa
 
                 var cpfHash = HashHelper.Generate(colaborador.Cpf, secret);
 
-                var convite = new Entity.Convite
+                var convite = new Entity.Pesquisas.Convite
                 {
                     Token = Guid.NewGuid().ToString("N"),
                     Hash = cpfHash,
@@ -310,7 +307,7 @@ namespace ARP.Modules.Pesquisa
 
             if (rascunho is null)
             {
-                rascunho = new Entity.PesquisaRascunho
+                rascunho = new Entity.Pesquisas.PesquisaRascunho
                 {
                     Token = token,
                     PesquisaId = convite.PesquisaId,

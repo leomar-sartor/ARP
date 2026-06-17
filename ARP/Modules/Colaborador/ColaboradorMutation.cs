@@ -1,7 +1,5 @@
-﻿using ARP.Entity;
-using ARP.Infra;
+﻿using ARP.Infra;
 using ARP.Modules.Colaborador.Types;
-using ARP.Modules.Pessoa.Types;
 using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Colaborador
@@ -19,12 +17,12 @@ namespace ARP.Modules.Colaborador
         }
 
         [GraphQLDescription("Cadastrar um novo colaborador")]
-        public async Task<Entity.Colaborador> CreateColaborador(
+        public async Task<Entity.Cadastros.Colaborador> CreateColaborador(
         ColaboradorInput input,
         [Service] Context context,
         CancellationToken ct)
         {
-            var entity = new Entity.Colaborador
+            var entity = new Entity.Cadastros.Colaborador
             {
                 Cpf = input.Cpf,
                 Nome = input.Nome,
@@ -41,7 +39,7 @@ namespace ARP.Modules.Colaborador
         }
 
         [GraphQLDescription("Atualizar uma colaborador existente")]
-        public async Task<Entity.Colaborador?> UpdateColaborador(
+        public async Task<Entity.Cadastros.Colaborador?> UpdateColaborador(
             long Id,
             ColaboradorInput input,
             [Service] Context context,

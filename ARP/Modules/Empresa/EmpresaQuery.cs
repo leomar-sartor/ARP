@@ -20,7 +20,7 @@ namespace ARP.Modules.Empresa
         [UseProjection]
         [UseFiltering] 
         [UseSorting]   
-        public IEnumerable<Entity.Empresa?> GetEmpresas(
+        public IEnumerable<Entity.Cadastros.Empresa?> GetEmpresas(
             [Service] Context context
             )
         {
@@ -30,7 +30,7 @@ namespace ARP.Modules.Empresa
         }
 
         [GraphQLDescription("Buscar por empresa")]
-        public async Task<Entity.Empresa?> GetEmpresaById(
+        public async Task<Entity.Cadastros.Empresa?> GetEmpresaById(
         long id,
         EmpresaByIdDataLoader dataLoader,
         CancellationToken cancellationToken)

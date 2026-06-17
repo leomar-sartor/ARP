@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Setor.Loaders
 {
-    public class SetorByIdDataLoader : BatchDataLoader<long, Entity.Setor>
+    public class SetorByIdDataLoader : BatchDataLoader<long, Entity.Cadastros.Setor>
     {
         private readonly IDbContextFactory<Context> _contextFactory;
 
@@ -16,14 +16,14 @@ namespace ARP.Modules.Setor.Loaders
             _contextFactory = contextFactory;
         }
 
-        protected override async Task<IReadOnlyDictionary<long, Entity.Setor>> LoadBatchAsync(
+        protected override async Task<IReadOnlyDictionary<long, Entity.Cadastros.Setor>> LoadBatchAsync(
             IReadOnlyList<long> keys,
             CancellationToken cancellationToken)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
             return await context.Setores
-                .Include(s => s.EmpresaSetores).ThenInclude(s => s.Empresa)
+                .Include(s => s.Empresa)
                 .Where(p => keys.Contains(p.Id))
                 .ToDictionaryAsync(p => p.Id, cancellationToken);
         }

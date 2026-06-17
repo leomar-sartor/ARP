@@ -1,13 +1,13 @@
-﻿using ARP.Entity;
+﻿using ARP.Entity.Exemplo;
 using ARP.Modules.Pessoa.Loaders;
 
 namespace ARP.Modules.Pessoa
 {
-    [ExtendObjectType(typeof(Entity.Pessoa))]
+    [ExtendObjectType(typeof(Entity.Exemplo.Pessoa))]
     public class PessoaResolvers
     {
         public async Task<IReadOnlyList<Endereco>> GetEnderecos(
-            [Parent] Entity.Pessoa pessoa,
+            [Parent] Entity.Exemplo.Pessoa pessoa,
             EnderecosByPessoaIdDataLoader dataLoader,
             CancellationToken ct)
         {
@@ -19,7 +19,7 @@ namespace ARP.Modules.Pessoa
         }
 
         public async Task<IReadOnlyList<Habilidade>> GetHabilidades(
-               [Parent] Entity.Pessoa pessoa,
+               [Parent] Entity.Exemplo.Pessoa pessoa,
                HabilidadesByPessoaIdDataLoader dataLoader,
                CancellationToken ct)
         {

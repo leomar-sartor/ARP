@@ -16,16 +16,16 @@ namespace ARP.Modules.Empresa
         }
 
         [GraphQLDescription("Cadastra uma nova empresa")]
-        public async Task<ARP.Entity.Empresa> CreateEmpresa(
+        public async Task<Entity.Cadastros.Empresa> CreateEmpresa(
             EmpresaInput input,
             [Service] Context context
             )
         {
             _logger.Log(LogLevel.Information, "Cadastrando Empresa");
 
-            var entity = new Entity.Empresa
+            var entity = new Entity.Cadastros.Empresa
             {
-                RazaoSocial = input.RazaoSocial,
+                NomeFantasia = input.NomeFantasia,
                 Descricao = input.Descricao
             };
 
@@ -36,7 +36,7 @@ namespace ARP.Modules.Empresa
         }
 
         [GraphQLDescription("Atualizar uma empresa existente")]
-        public async Task<Entity.Empresa?> UpdateEmpresa(
+        public async Task<Entity.Cadastros.Empresa?> UpdateEmpresa(
         long id,
         EmpresaInput input,
         [Service] Context context)
@@ -46,7 +46,7 @@ namespace ARP.Modules.Empresa
             if (entity == null)
                 return null;
 
-            entity.RazaoSocial = input.RazaoSocial;
+            entity.NomeFantasia = input.NomeFantasia;
             entity.Descricao = input.Descricao;
 
             await context.SaveChangesAsync();

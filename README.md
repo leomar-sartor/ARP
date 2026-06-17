@@ -49,6 +49,10 @@ Servidor: Render
 
 <p> Ao subir a aplicação ele cria a base de dados automaticamente, considerando o arquivo create tables.sql dentro da pasta SqlScripts na raiz do projeto.</p> 
 
+Open DevloperPowerShell
+dotnet tool install --global dotnet-ef --version 10.0.3
+dotnet ef --version
+
 //dotnet ef migrations add MinhaDescricao --project ARP.Infra --startup-project ARP
 //dotnet ef database update --project ARP.Infra --startup-project ARP
 

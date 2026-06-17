@@ -1,4 +1,5 @@
 ﻿using ARP.Entity;
+using ARP.Entity.Cadastros;
 using ARP.Infra;
 using ARP.Modules.Auth.Types;
 using ARP.Service;

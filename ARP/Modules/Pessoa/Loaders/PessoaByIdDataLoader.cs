@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Pessoa.Loaders
 {
-    public class PessoaByIdDataLoader : BatchDataLoader<long, Entity.Pessoa>
+    public class PessoaByIdDataLoader : BatchDataLoader<long, Entity.Exemplo.Pessoa>
     {
         private readonly IDbContextFactory<Context> _contextFactory;
 
@@ -16,7 +16,7 @@ namespace ARP.Modules.Pessoa.Loaders
             _contextFactory = contextFactory;
         }
 
-        protected override async Task<IReadOnlyDictionary<long, Entity.Pessoa>> LoadBatchAsync(
+        protected override async Task<IReadOnlyDictionary<long, Entity.Exemplo.Pessoa>> LoadBatchAsync(
             IReadOnlyList<long> keys,
             CancellationToken cancellationToken)
         {

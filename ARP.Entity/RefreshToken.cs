@@ -1,4 +1,6 @@
-﻿namespace ARP.Entity
+﻿using ARP.Entity.Cadastros;
+
+namespace ARP.Entity
 {
     public class RefreshToken
     {

@@ -21,7 +21,7 @@ namespace ARP.Modules.Pessoa
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public async Task<List<Entity.Pessoa>> GetPessoasAsync(
+        public async Task<List<Entity.Exemplo.Pessoa>> GetPessoasAsync(
             [Service] Context context)
         {
             _logger.Log(LogLevel.Critical, "########################################");
@@ -44,7 +44,7 @@ namespace ARP.Modules.Pessoa
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public async Task<IQueryable<Entity.Pessoa>> GetPessoasQueriableAsync(
+        public async Task<IQueryable<Entity.Exemplo.Pessoa>> GetPessoasQueriableAsync(
             [Service] Context context)
         {
             //_logger.Log(LogLevel.Information, "Exemplo Information"); -- VERDE
@@ -71,7 +71,7 @@ namespace ARP.Modules.Pessoa
         }
 
         [GraphQLDescription("Buscar por pessoa")]
-        public async Task<Entity.Pessoa?> GetPessoaById(
+        public async Task<Entity.Exemplo.Pessoa?> GetPessoaById(
         long id,
         PessoaByIdDataLoader dataLoader,
         CancellationToken cancellationToken)

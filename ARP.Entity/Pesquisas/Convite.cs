@@ -1,6 +1,7 @@
-﻿using ARP.Entity.Enums;
+﻿using ARP.Entity.Cadastros;
+using ARP.Entity.Enums;
 
-namespace ARP.Entity
+namespace ARP.Entity.Pesquisas
 {
     public class Convite : Base
     {

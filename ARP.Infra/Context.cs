@@ -1,4 +1,7 @@
 ﻿using ARP.Entity;
+using ARP.Entity.Cadastros;
+using ARP.Entity.Exemplo;
+using ARP.Entity.Pesquisas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +11,7 @@ namespace ARP.Infra;
 
 public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usuario, IdentityRole<long>, long>(options)
 {
-    #region Example
+    #region Example Pessoas
     public DbSet<Pessoa> Pessoas => Set<Pessoa>();
     public DbSet<Endereco> Enderecos => Set<Endereco>();
     public DbSet<Habilidade> Habilidades => Set<Habilidade>();
@@ -16,20 +19,21 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
     #endregion
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    #region Cadastros
     public DbSet<Empresa> Empresas => Set<Empresa>();
     public DbSet<Setor> Setores => Set<Setor>();
-    public DbSet<EmpresaSetor> EmpresaSetores => Set<EmpresaSetor>();
-
     public DbSet<Colaborador> Colaboradores => Set<Colaborador>();
+    #endregion
 
-
+    #region Pesquisas
     public DbSet<Convite> Convites => Set<Convite>();
     public DbSet<Pesquisa> Pesquisas => Set<Pesquisa>();
     public DbSet<Questao> Questoes => Set<Questao>();
     public DbSet<QuestaoOpcao> QuestaoOpcoes => Set<QuestaoOpcao>();
     public DbSet<QuestaoResposta> QuestaoRespostas => Set<QuestaoResposta>();
-
     public DbSet<PesquisaRascunho> PesquisaRascunhos => Set<PesquisaRascunho>();
+    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,44 +51,56 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             }
         }
 
+        #region Cadastros
         modelBuilder.Entity<Empresa>(entity =>
         {
             entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.RazaoSocial)
-                .IsRequired()
-                .HasMaxLength(200);
         });
 
-        modelBuilder.Entity<EmpresaSetor>()
-        .HasKey(x => new { x.EmpresaId, x.SetorId });
+        modelBuilder.Entity<Setor>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
 
-        modelBuilder.Entity<EmpresaSetor>()
-            .HasOne(x => x.Empresa)
-            .WithMany(e => e.EmpresaSetores)
-            .HasForeignKey(x => x.EmpresaId);
+        modelBuilder.Entity<Setor>()
+            .HasOne(e => e.Empresa)
+            .WithMany(p => p.Setores)
+            .HasForeignKey(e => e.EmpresaId);
 
-        modelBuilder.Entity<EmpresaSetor>()
-            .HasOne(x => x.Setor)
-            .WithMany(s => s.EmpresaSetores)
-            .HasForeignKey(x => x.SetorId);
+        modelBuilder.Entity<Colaborador>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
 
+        modelBuilder.Entity<Colaborador>()
+            .HasOne(e => e.Setor)
+            .WithMany(p => p.Colaboradores)
+            .HasForeignKey(e => e.SetorId);
+
+        modelBuilder.Entity<Colaborador>()
+            .HasOne(e => e.Empresa)
+            .WithMany(p => p.Colaboradores)
+            .HasForeignKey(e => e.EmpresaId);
+        #endregion
+
+        #region Identity
         modelBuilder.Entity<RefreshToken>()
             .HasOne(rt => rt.User)
             .WithMany()
             .HasForeignKey(rt => rt.UserId);
 
-        //modelBuilder.Entity<Usuario>().ToTable("arp_user");
-        //modelBuilder.Entity<IdentityRole<long>>().ToTable("arp_role");
-        //modelBuilder.Entity<IdentityUserRole<long>>().ToTable("arp_userrole")
-        //    .HasKey(r => new { r.UserId, r.RoleId });
-        //modelBuilder.Entity<IdentityUserClaim<long>>().ToTable("arp_userclaim")
-        //    .HasKey(r => new { r.Id });
-        //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
-        //modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
-        //modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
+        modelBuilder.Entity<Usuario>().ToTable("arp_user");
+        modelBuilder.Entity<IdentityRole<long>>().ToTable("arp_role");
+        modelBuilder.Entity<IdentityUserRole<long>>().ToTable("arp_userrole")
+            .HasKey(r => new { r.UserId, r.RoleId });
+        modelBuilder.Entity<IdentityUserClaim<long>>().ToTable("arp_userclaim")
+            .HasKey(r => new { r.Id });
+        modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
+        modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
+        modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
+        #endregion
 
-        #region Example
+        #region Exemplo Pessoa
         //Relacionamento 1:N Example
         modelBuilder.Entity<Endereco>()
         .HasOne(e => e.Pessoa)
@@ -111,23 +127,7 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .HasForeignKey(ph => ph.HabilidadeId);
         #endregion
 
-
-        modelBuilder.Entity<Colaborador>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-        });
-
-        modelBuilder.Entity<Colaborador>()
-        .HasOne(e => e.Setor)
-        .WithMany(p => p.Colaboradores)
-        .HasForeignKey(e => e.SetorId);
-
-        modelBuilder.Entity<Colaborador>()
-        .HasOne(e => e.Empresa)
-        .WithMany(p => p.Colaboradores)
-        .HasForeignKey(e => e.EmpresaId);
-
-        //Pesquisa
+        #region Pesquisas
 
         modelBuilder.Entity<Convite>(entity =>
         {
@@ -192,6 +192,7 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .HasOne(e => e.Pesquisa)
             .WithMany()
             .HasForeignKey(e => e.PesquisaId);
+        #endregion
     }
 
     private static LambdaExpression GenerateFilterExpression(Type type)

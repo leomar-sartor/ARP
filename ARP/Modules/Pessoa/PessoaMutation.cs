@@ -1,4 +1,5 @@
 ﻿using ARP.Entity;
+using ARP.Entity.Exemplo;
 using ARP.Infra;
 using ARP.Modules.Pessoa.Types;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,12 @@ namespace ARP.Modules.Pessoa
         }
 
         [GraphQLDescription("Cadastrar um nova pessoa")]
-        public async Task<Entity.Pessoa> CreatePessoa(
+        public async Task<Entity.Exemplo.Pessoa> CreatePessoa(
         PessoaInput input,
         [Service] Context context,
         CancellationToken ct)
         {
-            var entity = new Entity.Pessoa
+            var entity = new Entity.Exemplo.Pessoa
             {
                 Nome = input.Nome
             };
@@ -95,7 +96,7 @@ namespace ARP.Modules.Pessoa
         }
 
         [GraphQLDescription("Atualizar uma pessoa existente")]
-        public async Task<Entity.Pessoa?> UpdatePessoa(
+        public async Task<Entity.Exemplo.Pessoa?> UpdatePessoa(
             long Id,
             PessoaInput input,
             [Service] Context context,

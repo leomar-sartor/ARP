@@ -16,12 +16,12 @@ namespace ARP.Modules.Setor
         }
 
         [GraphQLDescription("Cadastrar um novo Setor")]
-        public async Task<Entity.Setor> CreateSetor(
+        public async Task<Entity.Cadastros.Setor> CreateSetor(
             long EmpresaId,
             SetorInput input,
             [Service] Context context)
         {
-            var entity = new Entity.Setor
+            var entity = new Entity.Cadastros.Setor
             {
                 Nome = input.Nome,
                 Descricao = input.Descricao
@@ -30,20 +30,11 @@ namespace ARP.Modules.Setor
             context.Setores.Add(entity);
             await context.SaveChangesAsync();
 
-            var relation = new Entity.EmpresaSetor
-            {
-                EmpresaId = EmpresaId,
-                SetorId = entity.Id
-            };
-
-            context.EmpresaSetores.Add(relation);
-            await context.SaveChangesAsync();
-
             return entity;
         }
 
         [GraphQLDescription("Atualizar um setor existente")]
-        public async Task<Entity.Setor?> UpdateSetor(
+        public async Task<Entity.Cadastros.Setor?> UpdateSetor(
         long id,
         SetorInput input,
         [Service] Context context)
@@ -72,11 +63,6 @@ namespace ARP.Modules.Setor
                 return false;
 
             entity.DeletedAt = DateTime.UtcNow;
-
-            var relations = context.EmpresaSetores.Where(r => r.SetorId == id);
-
-            if (relations != null)
-                relations.ToList().ForEach(r => r.DeletedAt = DateTime.UtcNow);
 
             await context.SaveChangesAsync();
 

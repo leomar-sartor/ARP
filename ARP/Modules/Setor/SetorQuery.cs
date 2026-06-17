@@ -22,7 +22,7 @@ namespace ARP.Modules.Setor
         [UseProjection]
         [UseFiltering]
         [UseSorting]
-        public IQueryable<Entity.Setor> GetSetores(
+        public IQueryable<Entity.Cadastros.Setor> GetSetores(
             [Service] Context context,
             IResolverContext resolverContext
             )
@@ -50,7 +50,7 @@ namespace ARP.Modules.Setor
         }
 
         [GraphQLDescription("Buscar por setor")]
-        public async Task<Entity.Setor?> GetSetorById(
+        public async Task<Entity.Cadastros.Setor?> GetSetorById(
         long id,
         SetorByIdDataLoader dataLoader,
         CancellationToken cancellationToken)

@@ -6,7 +6,7 @@ namespace ARP.Modules.Empresa
     {
         public static IRequestExecutorBuilder AddEmpresaQueriesAndMutations(this IRequestExecutorBuilder builder)
         {
-            builder.AddType<Entity.Empresa>();
+            builder.AddType<Entity.Cadastros.Empresa>();
             builder.AddTypeExtension<EmpresaQuery>();
             builder.AddTypeExtension<EmpresaMutation>();
             builder.AddTypeExtension<EmpresaResolvers>();

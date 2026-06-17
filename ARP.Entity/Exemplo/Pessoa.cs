@@ -1,4 +1,4 @@
-﻿namespace ARP.Entity
+﻿namespace ARP.Entity.Exemplo
 {
     public class Pessoa : Base
     {

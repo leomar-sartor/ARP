@@ -4,7 +4,7 @@ namespace ARP.Modules.Pesquisa.Types
     [GraphQLDescription("Dados da sessão de uma pesquisa em andamento")]
     public record PesquisaSessaoPayload(
         [GraphQLDescription("Pesquisa com questões e opções")]
-        Entity.Pesquisa Pesquisa,
+        Entity.Pesquisas.Pesquisa Pesquisa,
 
         [GraphQLDescription("ID da última questão respondida (null se não iniciou)")]
         long? UltimaQuestaoRespondidaId,

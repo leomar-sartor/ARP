@@ -1,4 +1,4 @@
-using ARP.Entity;
+using ARP.Entity.Cadastros;
 using ARP.Infra;
 using ARP.Infra.Jobs;
 using ARP.Modules.Auth;

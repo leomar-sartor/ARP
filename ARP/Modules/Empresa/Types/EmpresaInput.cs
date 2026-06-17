@@ -4,7 +4,7 @@
     public record EmpresaInput
     (
         [GraphQLDescription("Nome fantasia da empresa")]
-        string RazaoSocial,
+        string NomeFantasia,
 
         [GraphQLDescription("Descrição")]
         string Descricao
