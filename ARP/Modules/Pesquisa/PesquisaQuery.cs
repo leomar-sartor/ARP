@@ -58,10 +58,10 @@ namespace ARP.Modules.Pesquisa
                     RespostasParciais: rascunho?.RespostasParciais
                 );
             }
-            catch (Exception ex)
+            catch
             {
                 return new PesquisaSessaoPayload(
-                    Pesquisa: null,
+                    Pesquisa: new Entity.Pesquisas.Pesquisa(),
                     UltimaQuestaoRespondidaId: null,
                     RespostasParciais: null
                 );

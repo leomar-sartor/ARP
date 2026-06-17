@@ -190,6 +190,8 @@ namespace ARP.Modules.Pesquisa
 
             var serviceEmail = new EmailService();
 
+            var secret = Environment.GetEnvironmentVariable("KEY_HMAC") ?? "";
+
             foreach (var colaboradorId in colaboradorIds)
             {
                 // Evita duplicata: um colaborador não recebe 2 convites para a mesma pesquisa
@@ -200,8 +202,6 @@ namespace ARP.Modules.Pesquisa
                 var colaborador = await context.Colaboradores.FirstAsync(c => c.Id == colaboradorId, ct);
 
                 if (jaExiste) continue;
-
-                var secret = Environment.GetEnvironmentVariable("KEY_HMAC");
 
                 var cpfHash = HashHelper.Generate(colaborador.Cpf, secret);
 
@@ -245,7 +245,7 @@ namespace ARP.Modules.Pesquisa
             if (convite == null)
                 throw new Exception("Convite inválido");
 
-            var secret = Environment.GetEnvironmentVariable("KEY_HMAC");
+            var secret = Environment.GetEnvironmentVariable("KEY_HMAC") ?? "";
 
             var cpfHash = HashHelper.Generate(
                 cpf = Regex.Replace(cpf, @"\D", ""),
