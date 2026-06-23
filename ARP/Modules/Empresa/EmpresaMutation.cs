@@ -1,5 +1,6 @@
 ﻿using ARP.Infra;
 using ARP.Modules.Empresa.Types;
+using ARP.Utils;
 
 namespace ARP.Modules.Empresa
 {
@@ -23,10 +24,15 @@ namespace ARP.Modules.Empresa
         {
             _logger.Log(LogLevel.Information, "Cadastrando Empresa");
 
+            if (!CnpjHelper.IsValidCnpj(input.CNPJ))
+                throw new ArgumentException("CNPJ inválido");
+
             var entity = new Entity.Cadastros.Empresa
             {
+                Cnpj = CnpjHelper.OnlyLettersAndDigits(input.CNPJ),
                 NomeFantasia = input.NomeFantasia,
-                Descricao = input.Descricao
+                Descricao = input.Descricao,
+                Ativo = true
             };
 
             context.Empresas.Add(entity);
@@ -64,7 +70,15 @@ namespace ARP.Modules.Empresa
             if (entity == null)
                 return false;
 
-            entity.DeletedAt = DateTime.UtcNow;
+            var existAnySetor = context.Setores.Where(s => s.EmpresaId == id).Any();
+            if (existAnySetor)
+                throw new ArgumentException("Não é possível remover uma empresa que possui setores associados");
+
+            var existAnyUser = context.Users.Where(u => u.EmpresaId == id).Any();
+            if (existAnyUser)
+                throw new ArgumentException("Não é possível remover uma empresa que possui usuários associados");
+
+            entity.DeletedAt = DateTime.UtcNow; 
 
             await context.SaveChangesAsync();
 

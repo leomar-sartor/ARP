@@ -5,6 +5,6 @@
         string UserName,
         string Email,
         string Password,
-        long? EmpresaId
+        long EmpresaId
     );
 }

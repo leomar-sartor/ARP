@@ -7,6 +7,6 @@
         string Nome,
 
         [GraphQLDescription("Descrição")]
-        string Descricao
+        string? Descricao
     );
 }

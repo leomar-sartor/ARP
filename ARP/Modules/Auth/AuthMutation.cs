@@ -104,7 +104,8 @@ namespace ARP.Modules.Auth
                         Id: user.Id,
                         Email: user.Email,
                         UserName: user.UserName,
-                        Roles: new string[] { "Admin", "User" }
+                        Roles: new string[] { "Admin", "User" },
+                        EmpresaId: 0
                         //(await userManager.GetRolesAsync(user)).ToArray()
                     )
                 );
@@ -120,7 +121,8 @@ namespace ARP.Modules.Auth
                             Id: 0,
                             Email: null,
                             UserName: null,
-                            Roles: Array.Empty<string>()
+                            Roles: Array.Empty<string>(),
+                            EmpresaId: 0
                         )
                 );
             }
@@ -214,7 +216,8 @@ namespace ARP.Modules.Auth
                         Id: user.Id,
                         Email: user.Email,
                         UserName: user.UserName,
-                        Roles: new string[] { "Admin", "User" }
+                        Roles: new string[] { "Admin", "User" },
+                        EmpresaId: 0
                         //(await userManager.GetRolesAsync(user)).ToArray()
                     )
             );

@@ -1,5 +1,6 @@
 ﻿using ARP.Infra;
 using ARP.Modules.Colaborador.Types;
+using ARP.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Colaborador
@@ -22,9 +23,22 @@ namespace ARP.Modules.Colaborador
         [Service] Context context,
         CancellationToken ct)
         {
+            if(!CpfHelper.IsValidCpf(input.Cpf))
+                throw new ArgumentException("CPF inválido");
+
+            var empresa = await context.Empresas.FindAsync(new object[] { input.EmpresaId }, ct);
+
+            if (empresa == null)
+                throw new ArgumentException("Empresa não encontrada");
+
+            var setor = await context.Setores.FindAsync(new object[] { input.SetorId }, ct);
+
+            if (setor == null)
+                throw new ArgumentException("Setor não encontrado");
+
             var entity = new Entity.Cadastros.Colaborador
             {
-                Cpf = input.Cpf,
+                Cpf = CpfHelper.OnlyDigits(input.Cpf),
                 Nome = input.Nome,
                 Email = input.Email,
                 SetorId = input.SetorId,
@@ -81,7 +95,6 @@ namespace ARP.Modules.Colaborador
 
                 var now = DateTime.UtcNow;
                 entity.DeletedAt = now;
-
 
                 await context.SaveChangesAsync();
 

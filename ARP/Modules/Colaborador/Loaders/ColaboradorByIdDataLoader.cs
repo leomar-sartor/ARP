@@ -22,11 +22,13 @@ namespace ARP.Modules.Colaborador.Loaders
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
-            return await context.Colaboradores
+            var result = await context.Colaboradores
                 .Include(m => m.Empresa)
                 .Include(m => m.Setor)
                 .Where(p => keys.Contains(p.Id))
                 .ToDictionaryAsync(p => p.Id, cancellationToken);
+
+            return result;
         }
     }
 }

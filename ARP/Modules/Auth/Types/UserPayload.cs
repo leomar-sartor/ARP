@@ -4,6 +4,7 @@
         long Id,
         string? Email,
         string? UserName,
-        string[]? Roles
+        string[]? Roles,
+        long EmpresaId
     );
 }

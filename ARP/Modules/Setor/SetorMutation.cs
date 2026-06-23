@@ -21,13 +21,21 @@ namespace ARP.Modules.Setor
             SetorInput input,
             [Service] Context context)
         {
+            var empresa = await context.Empresas.FindAsync(EmpresaId);
+
+            if (empresa == null)
+                throw new ArgumentException("Empresa não encontrada");
+
             var entity = new Entity.Cadastros.Setor
             {
+                EmpresaId = EmpresaId,
                 Nome = input.Nome,
-                Descricao = input.Descricao
+                Descricao = input.Descricao,
+                Ativo = true
             };
 
             context.Setores.Add(entity);
+
             await context.SaveChangesAsync();
 
             return entity;
@@ -62,6 +70,10 @@ namespace ARP.Modules.Setor
             if (entity == null)
                 return false;
 
+            var existAnyColaborador = context.Colaboradores.Where(c => c.SetorId == id).Any();
+            if (existAnyColaborador)
+                throw new ArgumentException("Não é possível remover um setor que possui colaboradores associados");
+
             entity.DeletedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
@@ -70,3 +82,4 @@ namespace ARP.Modules.Setor
         }
     }
 }
+
