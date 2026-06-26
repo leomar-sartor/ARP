@@ -1,4 +1,5 @@
 using ARP.Entity.Cadastros;
+using ARP.Filters;
 using ARP.Infra;
 using ARP.Infra.Jobs;
 using ARP.Modules.Auth;
@@ -9,6 +10,7 @@ using ARP.Modules.Pesquisa;
 using ARP.Modules.Pessoa;
 using ARP.Modules.Setor;
 using ARP.Service;
+using HotChocolate.Data.Filters.Expressions;
 using HotChocolate.Execution;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -56,7 +58,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddPooledDbContextFactory<Context>(options =>
 {
-    options.UseNpgsql(connection);
+    options.UseNpgsql(connection)
+            
+    //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    //Esse NoTracking só diz ao EF Core: “por padrão, consultas não precisam ficar rastreadas pelo Change Tracker”. Para uma API GraphQL onde a maioria das queries só lê dados, isso costuma ser bom: usa menos memória e tende a ser mais rápido.
 
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
@@ -80,6 +85,16 @@ builder.Services
 
 builder.Services
     .AddGraphQLServer()
+    .AddFiltering(descriptor =>
+    {
+        descriptor.AddDefaults();
+        descriptor.Provider(
+            new QueryableFilterProvider(x => x
+                .AddFieldHandler<QueryableStringInvariantContainsHandler>()
+                .AddDefaultFieldHandlers()
+            )
+        );
+    })
     .ModifyRequestOptions(opt =>
     {
         opt.IncludeExceptionDetails = true;
@@ -98,7 +113,6 @@ builder.Services
         o.DefaultResolverStrategy = ExecutionStrategy.Serial;
     })
     .AddProjections()
-    .AddFiltering()
     .AddSorting()
     .AddQueryType(d => d.Name("Query"))
     .AddMutationType(d => d.Name("Mutation"))

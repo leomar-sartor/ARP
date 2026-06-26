@@ -1,5 +1,7 @@
 ﻿using ARP.Infra;
 using ARP.Modules.Colaborador.Loaders;
+using HotChocolate.Language;
+using HotChocolate.Resolvers;
 
 namespace ARP.Modules.Colaborador
 {
@@ -21,8 +23,11 @@ namespace ARP.Modules.Colaborador
         [UseFiltering]
         [UseSorting]
         public async Task<IQueryable<Entity.Cadastros.Colaborador>> ColaboradoresAsync(
-            [Service] Context context)
+            [Service] Context context,
+            IResolverContext resolverContext)
         {
+            var filterArg = resolverContext.ArgumentLiteral<IValueNode>("where");
+
             var result = context.Colaboradores
                 .AsQueryable();
 
