@@ -58,8 +58,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddPooledDbContextFactory<Context>(options =>
 {
-    options.UseNpgsql(connection)
-            
+    options.UseNpgsql(connection);         
     //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     //Esse NoTracking só diz ao EF Core: “por padrão, consultas não precisam ficar rastreadas pelo Change Tracker”. Para uma API GraphQL onde a maioria das queries só lê dados, isso costuma ser bom: usa menos memória e tende a ser mais rápido.
 
