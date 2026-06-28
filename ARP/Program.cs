@@ -21,11 +21,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var allowedOrigins =
+    (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS")
+        ?? builder.Configuration["Cors:AllowedOrigins"]
+        ?? "http://localhost:5173;https://arp-front.web.app;https://arp-front.firebaseapp.com")
+    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(
     opt => opt.AddPolicy("AllowAll", policy =>
         policy
-            .WithOrigins("http://localhost:5173")
-            //.AllowAnyOrigin()
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()

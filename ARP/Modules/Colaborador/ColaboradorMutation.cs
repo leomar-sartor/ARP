@@ -23,7 +23,7 @@ namespace ARP.Modules.Colaborador
         [Service] Context context,
         CancellationToken ct)
         {
-            if(!CpfHelper.IsValidCpf(input.Cpf))
+            if (!CpfHelper.IsValidCpf(input.Cpf))
                 throw new ArgumentException("CPF inválido");
 
             var empresa = await context.Empresas.FindAsync(new object[] { input.EmpresaId }, ct);
@@ -47,7 +47,14 @@ namespace ARP.Modules.Colaborador
 
             context.Colaboradores.Add(entity);
 
-            await context.SaveChangesAsync(ct);
+            try
+            {
+                await context.SaveChangesAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Erro: {ex.InnerException}");
+            }
 
             return entity;
         }
@@ -59,11 +66,14 @@ namespace ARP.Modules.Colaborador
             [Service] Context context,
             CancellationToken ct)
         {
-            var entity = await context.Colaboradores 
+            var entity = await context.Colaboradores
                    .FirstOrDefaultAsync(p => p.Id == Id, ct);
 
             if (entity == null)
-                return null; 
+                return null;
+
+            if (!CpfHelper.IsValidCpf(input.Cpf))
+                throw new ArgumentException("CPF inválido");
 
             entity.Cpf = input.Cpf;
             entity.Nome = input.Nome;

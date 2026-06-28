@@ -22,6 +22,7 @@ namespace ARP.Modules.Empresa
             [Service] Context context
             )
         {
+
             _logger.Log(LogLevel.Information, "Cadastrando Empresa");
 
             if (!CnpjHelper.IsValidCnpj(input.CNPJ))
@@ -36,7 +37,15 @@ namespace ARP.Modules.Empresa
             };
 
             context.Empresas.Add(entity);
-            await context.SaveChangesAsync();
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Erro: {ex.InnerException}");
+            }
 
             return entity;
         }
@@ -52,6 +61,10 @@ namespace ARP.Modules.Empresa
             if (entity == null)
                 return null;
 
+            if (!CnpjHelper.IsValidCnpj(input.CNPJ))
+                throw new ArgumentException("CNPJ inválido");
+
+            entity.Cnpj = CnpjHelper.OnlyLettersAndDigits(input.CNPJ);
             entity.NomeFantasia = input.NomeFantasia;
             entity.Descricao = input.Descricao;
 
@@ -78,7 +91,7 @@ namespace ARP.Modules.Empresa
             if (existAnyUser)
                 throw new ArgumentException("Não é possível remover uma empresa que possui usuários associados");
 
-            entity.DeletedAt = DateTime.UtcNow; 
+            entity.DeletedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync();
 

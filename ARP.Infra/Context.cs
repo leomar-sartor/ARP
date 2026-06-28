@@ -57,6 +57,10 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             entity.HasKey(e => e.Id);
         });
 
+        modelBuilder.Entity<Empresa>()
+            .HasIndex(e => e.Cnpj)
+            .IsUnique();
+
         modelBuilder.Entity<Setor>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -71,6 +75,10 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
         {
             entity.HasKey(e => e.Id);
         });
+
+        modelBuilder.Entity<Colaborador>()
+            .HasIndex(c => c.Cpf)
+            .IsUnique();
 
         modelBuilder.Entity<Colaborador>()
             .HasOne(e => e.Setor)
@@ -90,6 +98,9 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .HasForeignKey(rt => rt.UserId);
 
         modelBuilder.Entity<Usuario>().ToTable("arp_user");
+        modelBuilder.Entity<Usuario>()
+            .HasIndex(u => u.Cpf)
+            .IsUnique();
         modelBuilder.Entity<IdentityRole<long>>().ToTable("arp_role");
         modelBuilder.Entity<IdentityUserRole<long>>().ToTable("arp_userrole")
             .HasKey(r => new { r.UserId, r.RoleId });
