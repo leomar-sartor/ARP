@@ -58,28 +58,29 @@ dotnet ef --version
 
 ### Sobre Configurações
 
-<p> Existe um arquivo chamado launchSettings.json e appSettings.json.
-Esté é responsável por aramazenar dados sensiveis ao projeto
-como Conexão de Banco, Chave JWT, Tempo de expiração do token, Credenciais entre outras
-Para o docket utilizase ...</p>
+Segredos (`CONNECTION_STRING`, `JWT_KEY`, `KEY_HMAC`) **não** devem ficar em `appsettings.json` nem em `launchSettings.json`.
 
+| Ambiente | Onde configurar |
+|----------|-----------------|
+| Local | .NET User Secrets (recomendado) ou arquivo `.env` (gitignored) |
+| Docker | `--env-file .env` (copie de `.env.example`) |
+| Render / produção | Environment Variables / Secret Store do host |
+
+Local (User Secrets):
+
+```bash
+dotnet user-secrets set "ConnectionStrings:CONNECTION_STRING" "Host=...;Database=...;Username=...;Password=..." --project ARP
+dotnet user-secrets set "JWT_KEY" "sua-chave-longa-aleatoria" --project ARP
+dotnet user-secrets set "KEY_HMAC" "outra-chave-longa-aleatoria" --project ARP
+dotnet user-secrets set "JWT_EXPIRATION_HOURS" "8" --project ARP
+```
+
+Ou via Visual Studio: botão direito no projeto `ARP` → **Manage User Secrets**.
+
+Variáveis de ambiente equivalentes (Render/Docker): `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `KEY_HMAC`, `CORS_ALLOWED_ORIGINS`.
 ## ☁️ ACESSOS
 
-### RENDER - Aplicação
-
-``` 
-Endereço: https://dashboard.render.com/
-E-mail: leomar_sartor@unochapeco.edu.br
-Senha: _R@m0el_
-```
-
-### NEON - Banco de Dados
-
-``` 
-Endereço: https://console.neon.tech/realms/prod-realm/protocol/openid-connect/auth?client_id=neon-console&redirect_uri=https%3A%2F%2Fconsole.neon.tech%2Fauth%2Fkeycloak%2Fcallback&response_type=code&scope=openid+profile+email&state=njV-LQSI9AFPEqpRdVs2zQ%3D%3D%2C%2C%2C
-E-mail: leomar_sartor@unochapeco.edu.br
-Senha: _R@m0el_
-```
+Credenciais de painéis (Render, Neon, e-mail/senha) **não** devem ser commitadas. Use o gerenciador de senhas / secret store do time.
 
 ## 🔑 TOKEN
 

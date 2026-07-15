@@ -102,11 +102,11 @@ If the diff is empty, say so in one sentence and stop.
 
 ## Output format
 
-Respond in **pt-BR**. Start with a one-line verdict.
+Respond in **pt-BR**. Start with a one-line veredito.
 
 ```markdown
-## Veredicto
-[Aprovar / Aprovar com ressalvas / Pedir mudanças] — [1 frase]
+## Veredito
+[Aprovar / Aprovar com ressalvas / Solicitar mudanças] — [1 frase]
 
 ## Achados
 
@@ -114,7 +114,7 @@ Respond in **pt-BR**. Start with a one-line verdict.
 |------------|-------|----------|----------|
 | Critical / Warning / Suggestion / Nice | `path:line` | … | … |
 
-## O que está ok
+## O que está bom
 - [bullets curtos do que segue o padrão do repo]
 
 ## Perguntas (se houver)
@@ -122,12 +122,12 @@ Respond in **pt-BR**. Start with a one-line verdict.
 ```
 
 **Severities:**
-- **Critical** — bug, data loss, security, broken GraphQL middleware, hard delete on `Base`, secrets
-- **Warning** — N+1, missing module registration/migration, wrong soft-delete, ToList before paging, missing index on hot filter
-- **Suggestion** — better layering (`ARP.Service`), logging, naming, Authorization gaps, SQL/perf polish
-- **Nice** — polish only
+- 🔴 **Critical** — bug, data loss, security, broken GraphQL middleware, hard delete on `Base`, secrets
+- 🟡 **Warning** — N+1, missing module registration/migration, wrong soft-delete, ToList before paging, missing index on hot filter
+- 🔵 **Suggestion** — better layering (`ARP.Service`), logging, naming, Authorization gaps, SQL/perf polish
+- 🟢 **Nice** — polish only
 
-If no issues: one-line veredicto + short “O que está ok”. No empty tables.
+If no issues: one-line veredito + short “O que está ok”. No empty tables.
 
 ## Out of scope
 
@@ -136,4 +136,3 @@ If no issues: one-line veredicto + short “O que está ok”. No empty tables.
 - Do not require rewrites of legacy `Pessoa` sample quirks unless the change expands them.
 - Do not treat `efcore-patterns` / `modern-csharp-coding-standards` advice that conflicts with ARP (repos, NoTracking-by-default vs existing patterns, Result-type mandates) as merge blockers.
 - Do **not** demand Supabase RLS, Supabase Auth, or Supabase client patterns from `supabase-postgres-best-practices`.
-)

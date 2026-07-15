@@ -4,6 +4,7 @@ using ARP.Modules.Pesquisa.Types;
 using ARP.Service;
 using ARP.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -182,6 +183,7 @@ namespace ARP.Modules.Pesquisa
             long pesquisaId,
             long[] colaboradorIds,
             [Service] Context context,
+            [Service] IConfiguration config,
             CancellationToken ct)
         {
             var pesquisa = await context.Pesquisas
@@ -190,7 +192,7 @@ namespace ARP.Modules.Pesquisa
 
             var serviceEmail = new EmailService();
 
-            var secret = Environment.GetEnvironmentVariable("KEY_HMAC") ?? "";
+            var secret = ResolveHmacKey(config);
 
             foreach (var colaboradorId in colaboradorIds)
             {
@@ -237,6 +239,7 @@ namespace ARP.Modules.Pesquisa
             string token,
             string cpf,
             [Service] Context context,
+            [Service] IConfiguration config,
             CancellationToken ct)
         {
             var convite = await context.Convites
@@ -245,7 +248,7 @@ namespace ARP.Modules.Pesquisa
             if (convite == null)
                 throw new Exception("Convite inválido");
 
-            var secret = Environment.GetEnvironmentVariable("KEY_HMAC") ?? "";
+            var secret = ResolveHmacKey(config);
 
             var cpfHash = HashHelper.Generate(
                 cpf = Regex.Replace(cpf, @"\D", ""),
@@ -326,6 +329,22 @@ namespace ARP.Modules.Pesquisa
 
             await context.SaveChangesAsync(ct);
             return true;
+        }
+
+        /// <summary>
+        /// Resolves <c>KEY_HMAC</c> from environment variables, then User Secrets / configuration.
+        /// </summary>
+        private static string ResolveHmacKey(IConfiguration config)
+        {
+            var secret =
+                Environment.GetEnvironmentVariable("KEY_HMAC")
+                ?? config["KEY_HMAC"];
+
+            if (string.IsNullOrWhiteSpace(secret))
+                throw new InvalidOperationException(
+                    "KEY_HMAC is not configured. Set env var KEY_HMAC or User Secrets key KEY_HMAC.");
+
+            return secret;
         }
     }
 }

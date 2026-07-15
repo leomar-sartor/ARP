@@ -273,6 +273,13 @@ __pycache__/
 
 ### dotenv ###
 .env
+.env.local
+.env.*.local
+
+### Local secrets (never commit) ###
+**/appsettings.*.local.json
+**/appsettings.Local.json
+**/secrets.json
 
 ### DotnetCore ###
 # .NET Core build folders

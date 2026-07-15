@@ -39,15 +39,23 @@ builder.Services.AddCors(
 
 builder.Services.AddAuthModule();
 
-var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? builder.Configuration.GetConnectionString("JWT_KEY"); ;
+var jwtKey =
+    Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? builder.Configuration.GetConnectionString("JWT_KEY")
+    ?? builder.Configuration["JWT_KEY"];
 if (string.IsNullOrWhiteSpace(jwtKey))
-    throw new InvalidOperationException("Environment variable 'JWT_KEY' is not set or is empty. Please set JWT_KEY.");
+    throw new InvalidOperationException(
+        "JWT_KEY is not configured. Set env var JWT_KEY (preferred), User Secrets, or ConnectionStrings:JWT_KEY.");
 
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
-var connection = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? builder.Configuration.GetConnectionString("CONNECTION_STRING");
+var connection =
+    Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("Default");
 if (string.IsNullOrWhiteSpace(connection))
-    throw new InvalidOperationException("Database connection string is not configured. Set 'CONNECTION_STRING' as an environment variable or in configuration.");
+    throw new InvalidOperationException(
+        "CONNECTION_STRING is not configured. Set env var CONNECTION_STRING (preferred) or ConnectionStrings:CONNECTION_STRING via User Secrets.");
 
 builder.Services
     .AddIdentity<Usuario, IdentityRole<long>>()
