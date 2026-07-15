@@ -58,7 +58,7 @@ dotnet ef --version
 
 ### Sobre Configurações
 
-Segredos (`CONNECTION_STRING`, `JWT_KEY`, `KEY_HMAC`) **não** devem ficar em `appsettings.json` nem em `launchSettings.json`.
+Segredos (`CONNECTION_STRING`, `JWT_KEY`, `KEY_HMAC`, `SMTP_USER`, `SMTP_PASSWORD`) **não** devem ficar em `appsettings.json` nem em `launchSettings.json`.
 
 | Ambiente | Onde configurar |
 |----------|-----------------|
@@ -73,11 +73,13 @@ dotnet user-secrets set "ConnectionStrings:CONNECTION_STRING" "Host=...;Database
 dotnet user-secrets set "JWT_KEY" "sua-chave-longa-aleatoria" --project ARP
 dotnet user-secrets set "KEY_HMAC" "outra-chave-longa-aleatoria" --project ARP
 dotnet user-secrets set "JWT_EXPIRATION_HOURS" "8" --project ARP
+dotnet user-secrets set "SMTP_USER" "noreply@seu-dominio.com" --project ARP
+dotnet user-secrets set "SMTP_PASSWORD" "sua-senha-smtp" --project ARP
 ```
 
 Ou via Visual Studio: botão direito no projeto `ARP` → **Manage User Secrets**.
 
-Variáveis de ambiente equivalentes (Render/Docker): `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `KEY_HMAC`, `CORS_ALLOWED_ORIGINS`.
+Variáveis de ambiente equivalentes (Render/Docker): `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `KEY_HMAC`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `CORS_ALLOWED_ORIGINS`.
 ## ☁️ ACESSOS
 
 Credenciais de painéis (Render, Neon, e-mail/senha) **não** devem ser commitadas. Use o gerenciador de senhas / secret store do time.

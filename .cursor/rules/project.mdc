@@ -29,7 +29,7 @@ ARP (Análise de Riscos Psicossociais) is a **.NET 10 GraphQL API** for managing
 - `ARP.Utils` — `CpfHelper`, `CnpjHelper`, `DateTimeHelper`, `HashHelper`
 - `ARP.Repo` — **empty / unused**; do not revive without an explicit decision
 
-**Config:** `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `CORS_ALLOWED_ORIGINS` via env (prefer env over committing secrets). On startup: `db.Database.Migrate()`.
+**Config:** `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `SMTP_USER`, `SMTP_PASSWORD`, `CORS_ALLOWED_ORIGINS` via env (prefer env over committing secrets). On startup: `db.Database.Migrate()`.
 
 ## 3. Folder structure & feature pattern
 

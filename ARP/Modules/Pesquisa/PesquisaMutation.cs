@@ -184,13 +184,12 @@ namespace ARP.Modules.Pesquisa
             long[] colaboradorIds,
             [Service] Context context,
             [Service] IConfiguration config,
+            [Service] EmailService serviceEmail,
             CancellationToken ct)
         {
             var pesquisa = await context.Pesquisas
                 .FirstOrDefaultAsync(p => p.Id == pesquisaId, ct)
                 ?? throw new ArgumentException("Pesquisa não encontrada.");
-
-            var serviceEmail = new EmailService();
 
             var secret = ResolveHmacKey(config);
 
@@ -224,7 +223,8 @@ namespace ARP.Modules.Pesquisa
                         emailRemetente: "noreply@brgestao.net",
                         nomeDestinario: colaborador.Nome,
                         emailDestinario: colaborador.Email,
-                        mensagem: $"http://localhost:5173/survey?token={convite.Token}"
+                        mensagem: $"http://localhost:5173/survey?token={convite.Token}",
+                        cancellationToken: ct
                     );
 
             }
