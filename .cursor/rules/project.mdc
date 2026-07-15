@@ -1,0 +1,180 @@
+---
+description: ARP project conventions — stack, modules, EF Core, GraphQL patterns
+alwaysApply: true
+---
+
+# ARP — Project Rules
+
+## 1. What this project is
+
+ARP (Análise de Riscos Psicossociais) is a **.NET 10 GraphQL API** for managing companies, sectors, employees, auth, and psychosocial surveys (`Pesquisa`). Clients hit `/graphql` (GraphiQL at `/graphiql`). There is **no NestJS/Node/TypeORM** in this repo.
+
+## 2. Real stack
+
+| Layer | Tech |
+|-------|------|
+| Runtime | .NET 10 (`net10.0`), ASP.NET Core minimal hosting (`ARP/Program.cs`) |
+| API | HotChocolate 15 (filtering, sorting, projections, paging, authorization, cost analysis) |
+| Auth | ASP.NET Identity + JWT Bearer; refresh token in httpOnly cookie `refresh_token` |
+| ORM | **EF Core 10** + **Npgsql** (PostgreSQL / Neon) — not TypeORM |
+| Email | MailKit / MimeKit (`ARP.Service/EmailService.cs`) |
+| Jobs | `BackgroundService` (`ARP.Infra/Jobs/RefreshTokenCleanupJob.cs`) |
+
+**Projects (solution `ARP.slnx`):**
+
+- `ARP` — GraphQL host, feature modules under `ARP/Modules/`
+- `ARP.Entity` — entities (`Cadastros/`, `Pesquisas/`, `Exemplo/`), `Base`, enums
+- `ARP.Infra` — `Context`, migrations, jobs
+- `ARP.Service` — shared services (`TokenService`, `EmailService`, Auth stubs)
+- `ARP.Utils` — `CpfHelper`, `CnpjHelper`, `DateTimeHelper`, `HashHelper`
+- `ARP.Repo` — **empty / unused**; do not revive without an explicit decision
+
+**Config:** `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `CORS_ALLOWED_ORIGINS` via env (prefer env over committing secrets). On startup: `db.Database.Migrate()`.
+
+## 3. Folder structure & feature pattern
+
+Each GraphQL feature lives under `ARP/Modules/{Feature}/`:
+
+```
+Modules/Empresa/
+  EmpresaModuleConfig.cs     # AddXQueriesAndMutations extension
+  EmpresaQuery.cs            # [ExtendObjectType("Query")]
+  EmpresaMutation.cs         # [ExtendObjectType("Mutation")]
+  EmpresaResolvers.cs        # [ExtendObjectType(typeof(Entity))] field resolvers
+  Types/EmpresaInput.cs      # record inputs/payloads
+  Loaders/...DataLoader.cs   # BatchDataLoader
+```
+
+**Wire-up checklist for a new feature:**
+
+1. Entity in `ARP.Entity` (extend `Base` when soft-delete applies)
+2. `DbSet<>` + relationships in `ARP.Infra/Context.OnModelCreating`
+3. EF migration: `dotnet ef migrations add <Name> --project ARP.Infra --startup-project ARP`
+4. Module folder + `*ModuleConfig` → register in `Program.cs` (`.AddXQueriesAndMutations()`)
+5. Prefer business rules in `ARP.Service` when non-trivial; thin GraphQL layer is OK for simple CRUD
+
+`Pessoa` under `ARP.Entity/Exemplo` is a **reference/sample** feature (1:N, N:M) — copy patterns from it; do not treat it as core domain unless asked.
+
+## 4. Code conventions
+
+### DI
+
+- Constructor inject `ILogger<T>` on Query/Mutation classes.
+- GraphQL method params: `[Service] Context`, `UserManager<Usuario>`, `IConfiguration`, DataLoaders, `CancellationToken`.
+- Register module DI in `*ModuleConfig` (e.g. `AddAuthModule` → `AddScoped<AuthService>`).
+- Services: `AddScoped` (e.g. `EmailService`); hosted jobs: `AddSingleton` + `AddHostedService`.
+
+```csharp
+// ✅ GOOD — module registration
+public static IRequestExecutorBuilder AddEmpresaQueriesAndMutations(
+    this IRequestExecutorBuilder builder)
+{
+    builder.AddType<Entity.Cadastros.Empresa>();
+    builder.AddTypeExtension<EmpresaQuery>();
+    builder.AddTypeExtension<EmpresaMutation>();
+    builder.AddTypeExtension<EmpresaResolvers>();
+    return builder;
+}
+```
+
+### Async / GraphQL lists
+
+- Prefer `async` + `await` + `CancellationToken` on mutations and DataLoaders.
+- List queries that use `[UsePaging]/[UseFiltering]/[UseSorting]/[UseProjection]` must return **`IQueryable<T>`** (or `IEnumerable` backed by queryable), **not** materialize with `ToListAsync` first.
+
+```csharp
+// ✅ GOOD
+[UsePaging(IncludeTotalCount = true)]
+[UseProjection, UseFiltering, UseSorting]
+public IEnumerable<Empresa?> GetEmpresas([Service] Context context)
+    => context.Empresas.AsQueryable();
+
+// ❌ BAD — breaks deferred filtering/paging/projections
+public async Task<List<Pessoa>> GetPessoas([Service] Context context)
+    => await context.Pessoas.ToListAsync();
+```
+
+### Errors
+
+- Domain/validation failures: `throw new ArgumentException("message")` (common in mutations).
+- Auth/session edge cases: `GraphQLException` where already used (e.g. missing refresh session).
+- Auth register/login often return payload records (`Success`, `Message`) instead of throwing — keep that style in Auth.
+- Do not swallow exceptions empty; prefer rethrow after rollback in transactions.
+
+### Logging
+
+- Inject `ILogger<T>`; use structured logs when adding new ones (`_logger.LogInformation("...", arg)`).
+- Avoid noisy `LogLevel.Critical` “START SQL” banners in production paths (legacy in `PessoaQuery`).
+- Console logging is configured in `Program.cs`; no separate logging framework today.
+
+### Types / XML docs
+
+- GraphQL inputs/payloads: `record` in `Types/` with `[GraphQLDescription]`.
+- Public C# APIs in services/utils: add XML doc comments (`///`).
+- Identifiers, type names, and code samples: **English**; user-facing GraphQL descriptions may stay in Portuguese.
+
+### Dates / documents
+
+- Persist UTC (`DateTime.UtcNow` / `DateTimeHelper`).
+- CPF/CNPJ: validate and normalize via `CpfHelper` / `CnpjHelper` before save.
+
+## 5. Data access (EF Core)
+
+- DbContext: `ARP.Infra.Context` (`IdentityDbContext<Usuario, IdentityRole<long>, long>`).
+- Registration: `AddPooledDbContextFactory<Context>` + `UseNpgsql(connection)`.
+- **Resolvers/mutations:** inject `[Service] Context`.
+- **DataLoaders:** inject `IDbContextFactory<Context>`, create short-lived context:
+
+```csharp
+await using var context = await _factory.CreateDbContextAsync(cancellationToken);
+```
+
+- Soft delete: entities inherit `ARP.Entity.Base` (`DeletedAt`). Global query filter excludes `DeletedAt != null`. **Deletes set `DeletedAt`**, do not `Remove()` soft-deletable entities.
+- Relationships & unique indexes: configure in `Context.OnModelCreating` (not only Fluent on ad-hoc calls).
+- Bulk hard delete without tracking: `ExecuteDeleteAsync` is OK for jobs (see refresh-token cleanup).
+- **No application SQL-raw / TypeORM.** Do not introduce `FromSqlRaw` unless explicitly required; prefer LINQ.
+
+```csharp
+// ✅ Soft delete
+entity.DeletedAt = DateTime.UtcNow;
+await context.SaveChangesAsync(ct);
+
+// ❌ Hard delete on Base entities
+context.Empresas.Remove(entity);
+```
+
+### N+1 / relations
+
+- Field resolvers + `BatchDataLoader` for collections/by-id (see `EmpresaResolvers` + `SetoresByEmpresaIdDataLoader`).
+- Avoid eager `.Include()` when a DataLoader resolver already loads that navigation.
+
+## 6. Do NOT (anti-patterns)
+
+| ❌ Avoid | ✅ Do instead |
+|----------|----------------|
+| NestJS modules, TypeORM repos, `package.json` patterns | Follow HotChocolate modules + EF `Context` |
+| New logic in empty `ARP.Repo` | Use `ARP.Service` / module mutations |
+| Hard delete of `Base` entities | Set `DeletedAt` |
+| `ToListAsync` before paging/filter middleware | Return `IQueryable` / `AsQueryable()` |
+| Skip `*ModuleConfig` + `Program.cs` registration | Always wire extensions like existing features |
+| Skip CPF/CNPJ helpers | `CpfHelper` / `CnpjHelper` |
+| Filter `DeletedAt == null` manually on `Base` types | Rely on global query filter |
+| Put secrets (JWT, DB password) in new committed files | Env vars / local config; never paste secrets into rules/docs you create |
+| New REST controllers for domain CRUD | GraphQL Query/Mutation under `Modules/` |
+| Invent a second ORM or Dapper layer by default | Stay on EF Core + Npgsql |
+
+```csharp
+// ❌ BAD — N+1 without batching
+public async Task<List<Setor>> GetSetores([Parent] Empresa e, [Service] Context db)
+    => await db.Setores.Where(s => s.EmpresaId == e.Id).ToListAsync();
+
+// ✅ GOOD — BatchDataLoader grouped by EmpresaId
+public async Task<IReadOnlyList<Setor>> GetSetoresDaEmpresa(
+    [Parent] Empresa empresa,
+    SetoresByEmpresaIdDataLoader dataLoader,
+    CancellationToken ct)
+    => await dataLoader.LoadAsync(empresa.Id, ct) ?? Array.Empty<Setor>();
+```
+
+When unsure, mirror **Empresa** (CRUD + resolver + loader) or **Pessoa** (nested relations sample) and **Auth** (Identity + cookies + JWT).
+)

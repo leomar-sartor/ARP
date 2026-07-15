@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "efcore-patterns": {
+      "source": "aaronontheweb/dotnet-skills",
+      "sourceType": "github",
+      "skillPath": "skills/efcore-patterns/SKILL.md",
+      "computedHash": "b3eda88aa97e7255c2b33d8ad5100db863ad36e7e1fe980e57be00b4f6b3606f"
+    },
+    "modern-csharp-coding-standards": {
+      "source": "aaronontheweb/dotnet-skills",
+      "sourceType": "github",
+      "skillPath": "skills/csharp-coding-standards/SKILL.md",
+      "computedHash": "38d6547db382a391ed740eef9d376f718639d27ecafe5bdedb981001b190acc9"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "768f9a7532780a72165f79c91d71a4bf82abd9ed31045238c2acb40322fc1d0a"
+    }
+  }
+}
