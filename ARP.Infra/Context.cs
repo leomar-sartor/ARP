@@ -29,6 +29,7 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
     #region Pesquisas
     public DbSet<Convite> Convites => Set<Convite>();
     public DbSet<Pesquisa> Pesquisas => Set<Pesquisa>();
+    public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Questao> Questoes => Set<Questao>();
     public DbSet<QuestaoOpcao> QuestaoOpcoes => Set<QuestaoOpcao>();
     public DbSet<QuestaoResposta> QuestaoRespostas => Set<QuestaoResposta>();
@@ -153,6 +154,11 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             entity.HasKey(e => e.Id);
         });
 
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+        });
+
         modelBuilder.Entity<Questao>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -177,6 +183,11 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
           .HasOne(e => e.Pesquisa)
           .WithMany(p => p.Questoes)
           .HasForeignKey(e => e.PesquisaId);
+
+        modelBuilder.Entity<Questao>()
+          .HasOne(e => e.Categoria)
+          .WithMany(c => c.Questoes)
+          .HasForeignKey(e => e.CategoriaId);
 
         modelBuilder.Entity<QuestaoOpcao>()
            .HasOne(q => q.Questao)

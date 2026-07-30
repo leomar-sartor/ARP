@@ -3,6 +3,7 @@ using ARP.Filters;
 using ARP.Infra;
 using ARP.Infra.Jobs;
 using ARP.Modules.Auth;
+using ARP.Modules.Categoria;
 using ARP.Modules.Colaborador;
 using ARP.Modules.Empresa;
 using ARP.Modules.Job;
@@ -53,6 +54,7 @@ var connection =
     Environment.GetEnvironmentVariable("CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("Default");
+
 if (string.IsNullOrWhiteSpace(connection))
     throw new InvalidOperationException(
         "CONNECTION_STRING is not configured. Set env var CONNECTION_STRING (preferred) or ConnectionStrings:CONNECTION_STRING via User Secrets.");
@@ -134,6 +136,7 @@ builder.Services
     .AddSetorQueriesAndMutations()
     .AddPessoaQueriesAndMutations()
     .AddColaboradorQueriesAndMutations()
+    .AddCategoriaQueriesAndMutations()
     .AddPesquisaQueriesAndMutations()
     .AddJobMutations()
     .DisableIntrospection(false);

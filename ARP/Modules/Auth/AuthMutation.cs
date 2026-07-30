@@ -252,14 +252,38 @@ namespace ARP.Modules.Auth
         [Authorize]
         public async Task<RegisterUserPayload> RegisterUserAsync(
             RegisterUserInput input,
-            [Service] UserManager<Usuario> userManager
+            [Service] UserManager<Usuario> userManager,
+            [Service] Context context
         )
         {
             _logger.Log(LogLevel.Information, "Registrando");
 
+            var cpf = Utils.CpfHelper.OnlyDigits(input.Cpf);
+
+            if (!Utils.CpfHelper.IsValidCpf(cpf))
+            {
+                return new RegisterUserPayload(
+                    null,
+                    false,
+                    "CPF inválido"
+                );
+            }
+
+            var cpfAlreadyExists = await context.Users
+                .AnyAsync(u => u.Cpf == cpf);
+
+            if (cpfAlreadyExists)
+            {
+                return new RegisterUserPayload(
+                    null,
+                    false,
+                    "Já existe um cadastro com este CPF."
+                );
+            }
+
             var user = new Usuario
             {
-                Cpf = input.Cpf,
+                Cpf = cpf,
                 UserName = input.UserName,
                 Email = input.Email,
                 EmpresaId = input.EmpresaId
@@ -285,6 +309,14 @@ namespace ARP.Modules.Auth
                     true,
                     "Usuário criado com sucesso"
                 );
+            }
+            catch (DbUpdateException)
+            {
+                return new RegisterUserPayload(
+                        null,
+                        false,
+                        "Já existe um cadastro com este CPF."
+                    );
             }
             catch (Exception e)
             {

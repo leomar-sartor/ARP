@@ -15,6 +15,8 @@ namespace ARP.Modules.Pesquisa.Types
         bool MultiplasRespostas,
         [GraphQLDescription("Maximo de caracteres para uma resposta descritiva.")]
         int? MaximoDeCaracteres,
+        [GraphQLDescription("Categoria da questão.")]
+        long? CategoriaId,
         [GraphQLDescription("Opções disponíveis para a questão.")]
         IList<OpcaoInput>? Opcoes
     );

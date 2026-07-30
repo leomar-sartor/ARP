@@ -39,36 +39,46 @@ namespace ARP.Modules.Pesquisa
             //    throw new ArgumentException("A pesquisa deve conter pelo menos uma questão.");
             //}
 
-            foreach (var questaoInput in input.Questoes)
-            {
-                var questao = new Entity.Pesquisas.Questao
-                {
-                    Titulo = questaoInput.Titulo,
-                    Tipo = questaoInput.Tipo,
-                    Obrigatoria = questaoInput.Obrigatoria,
-                    MultiplasRespostas = questaoInput.MultiplasRespostas,
-                    MaximoDeCaracteres = questaoInput.MaximoDeCaracteres
-                };
-
-
-                if (questaoInput.Opcoes != null && questaoInput.Opcoes.Any())
-                {
-                    foreach (var opcaoInput in questaoInput.Opcoes)
-                    {
-                        var opcao = new Entity.Pesquisas.QuestaoOpcao
-                        {
-                            Ordem = opcaoInput.Ordem,
-                            Descricao = opcaoInput.Descricao
-                        };
-
-                        questao.Opcoes.Add(opcao);
-                    }
-                }
-
-                entity.Questoes.Add(questao);
-            }
+            AddQuestoesFromInput(entity, input.Questoes);
 
             context.Pesquisas.Add(entity);
+
+            await context.SaveChangesAsync();
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Updates an existing pesquisa (header + replaces questoes/opcoes when there are no answers yet).
+        /// </summary>
+        [GraphQLDescription("Atualizar uma pesquisa existente")]
+        public async Task<Entity.Pesquisas.Pesquisa?> UpdatePesquisa(
+            long id,
+            PesquisaInput input,
+            [Service] Context context)
+        {
+            var entity = await context.Pesquisas
+                .Include(p => p.Questoes)
+                    .ThenInclude(q => q.Opcoes)
+                .Include(p => p.Questoes)
+                    .ThenInclude(q => q.Respostas)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (entity is null)
+                return null;
+
+            if (entity.Questoes.Any(q => q.Respostas.Count > 0))
+                throw new ArgumentException(
+                    "Não é possível editar uma pesquisa que já possui respostas.");
+
+            entity.Nome = input.Nome;
+            entity.DataInicial = input.DataInicial;
+            entity.DataFinal = input.DataFinal;
+
+            context.Questoes.RemoveRange(entity.Questoes);
+            entity.Questoes.Clear();
+
+            AddQuestoesFromInput(entity, input.Questoes);
 
             await context.SaveChangesAsync();
 
@@ -329,6 +339,43 @@ namespace ARP.Modules.Pesquisa
 
             await context.SaveChangesAsync(ct);
             return true;
+        }
+
+        /// <summary>
+        /// Maps questao inputs onto a pesquisa entity (shared by create and update).
+        /// </summary>
+        private static void AddQuestoesFromInput(
+            Entity.Pesquisas.Pesquisa entity,
+            IList<QuestaoInput> questoes)
+        {
+            for (var i = 0; i < questoes.Count; i++)
+            {
+                var questaoInput = questoes[i];
+                var questao = new Entity.Pesquisas.Questao
+                {
+                    Ordem = i + 1,
+                    Titulo = questaoInput.Titulo,
+                    Tipo = questaoInput.Tipo,
+                    Obrigatoria = questaoInput.Obrigatoria,
+                    MultiplasRespostas = questaoInput.MultiplasRespostas,
+                    MaximoDeCaracteres = questaoInput.MaximoDeCaracteres,
+                    CategoriaId = questaoInput.CategoriaId
+                };
+
+                if (questaoInput.Opcoes != null && questaoInput.Opcoes.Any())
+                {
+                    foreach (var opcaoInput in questaoInput.Opcoes)
+                    {
+                        questao.Opcoes.Add(new Entity.Pesquisas.QuestaoOpcao
+                        {
+                            Ordem = opcaoInput.Ordem,
+                            Descricao = opcaoInput.Descricao
+                        });
+                    }
+                }
+
+                entity.Questoes.Add(questao);
+            }
         }
 
         /// <summary>

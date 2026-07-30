@@ -13,7 +13,10 @@ namespace ARP.Entity.Pesquisas
 
         public bool MultiplasRespostas { get; set; } = false;
 
-        public int? MaximoDeCaracteres { get; set; } 
+        public int? MaximoDeCaracteres { get; set; }
+
+        public long? CategoriaId { get; set; }
+        public Categoria? Categoria { get; set; }
 
         public long PesquisaId { get; set; }
         public Pesquisa Pesquisa { get; set; } = default!;

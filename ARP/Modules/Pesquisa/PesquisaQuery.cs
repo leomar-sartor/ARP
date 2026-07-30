@@ -1,4 +1,5 @@
 ﻿using ARP.Infra;
+using ARP.Modules.Pesquisa.Loaders;
 using ARP.Modules.Pesquisa.Types;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,7 @@ namespace ARP.Modules.Pesquisa
             _logger = logger;
         }
 
-        [GraphQLDescription("Buscar pessoas com opções de paginação, filtragem, projections e ordenações")]
+        [GraphQLDescription("Buscar pesquisas com opções de paginação, filtragem, projections e ordenações")]
         [UsePaging(IncludeTotalCount = true)]
         [UseProjection]
         [UseFiltering]
@@ -30,6 +31,18 @@ namespace ARP.Modules.Pesquisa
                 .AsQueryable();
 
             return result;
+        }
+
+        /// <summary>
+        /// Returns a pesquisa by id with nested questoes and opcoes for the edit form.
+        /// </summary>
+        [GraphQLDescription("Buscar pesquisa por id")]
+        public async Task<Entity.Pesquisas.Pesquisa?> GetPesquisaById(
+            long id,
+            PesquisaByIdDataLoader dataLoader,
+            CancellationToken cancellationToken)
+        {
+            return await dataLoader.LoadAsync(id, cancellationToken);
         }
 
         // Retomar ou iniciar pesquisa pelo token

@@ -26,6 +26,14 @@ namespace ARP.Modules.Colaborador
             if (!CpfHelper.IsValidCpf(input.Cpf))
                 throw new ArgumentException("CPF inválido");
 
+            var cpf = CpfHelper.OnlyDigits(input.Cpf);
+
+            var cpfAlreadyExists = await context.Colaboradores
+                .AnyAsync(c => c.Cpf == cpf, ct);
+
+            if (cpfAlreadyExists)
+                throw new ArgumentException("Já existe um cadastro com este CPF.");
+
             var empresa = await context.Empresas.FindAsync(new object[] { input.EmpresaId }, ct);
 
             if (empresa == null)
@@ -38,7 +46,7 @@ namespace ARP.Modules.Colaborador
 
             var entity = new Entity.Cadastros.Colaborador
             {
-                Cpf = CpfHelper.OnlyDigits(input.Cpf),
+                Cpf = cpf,
                 Nome = input.Nome,
                 Email = input.Email,
                 SetorId = input.SetorId,
@@ -51,14 +59,17 @@ namespace ARP.Modules.Colaborador
             {
                 await context.SaveChangesAsync(ct);
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
             {
-                throw new ArgumentException($"Erro: {ex.InnerException}");
+                throw new ArgumentException("Já existe um cadastro com este CPF.");
             }
 
             return entity;
         }
 
+        /// <summary>
+        /// Updates an existing colaborador.
+        /// </summary>
         [GraphQLDescription("Atualizar uma colaborador existente")]
         public async Task<Entity.Cadastros.Colaborador?> UpdateColaborador(
             long Id,
@@ -75,18 +86,32 @@ namespace ARP.Modules.Colaborador
             if (!CpfHelper.IsValidCpf(input.Cpf))
                 throw new ArgumentException("CPF inválido");
 
-            entity.Cpf = input.Cpf;
+            var cpf = CpfHelper.OnlyDigits(input.Cpf);
+
+            var cpfAlreadyExists = await context.Colaboradores
+                .AnyAsync(c => c.Cpf == cpf && c.Id != Id, ct);
+
+            if (cpfAlreadyExists)
+                throw new ArgumentException("Já existe um cadastro com este CPF.");
+
+            entity.Cpf = cpf;
             entity.Nome = input.Nome;
             entity.Email = input.Email;
             entity.SetorId = input.SetorId;
             entity.EmpresaId = input.EmpresaId;
             entity.UpdatedAt = DateTime.UtcNow;
 
-            await context.SaveChangesAsync();
+            try
+            {
+                await context.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+            {
+                throw new ArgumentException("Já existe um cadastro com este CPF.");
+            }
 
             return entity;
         }
-
         [GraphQLDescription("Remover um colaborador")]
         public async Task<bool> RemoveColaborador(
             long id,
@@ -117,6 +142,17 @@ namespace ARP.Modules.Colaborador
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Detects PostgreSQL unique constraint violations (SQLSTATE 23505).
+        /// </summary>
+        private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+        {
+            var message = ex.InnerException?.Message ?? ex.Message;
+            return message.Contains("23505", StringComparison.Ordinal)
+                || message.Contains("unique", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("IX_Colaboradores_Cpf", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
