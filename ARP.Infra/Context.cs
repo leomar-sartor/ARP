@@ -109,7 +109,6 @@ public class Context(DbContextOptions<Context> options) : IdentityDbContext<Usua
             .HasKey(r => new { r.Id });
         modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
         modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("arp_roleclaim");
-        modelBuilder.Entity<IdentityUserToken<long>>().ToTable("arp_usertoken");
         #endregion
 
         #region Exemplo Pessoa

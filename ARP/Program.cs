@@ -116,11 +116,11 @@ builder.Services
     })
     .ModifyCostOptions(options =>
     {
-        options.MaxFieldCost = 15000;       // seu fieldCost foi 2477 — coloque acima disso
-        options.MaxTypeCost = 15000;
-        options.EnforceCostLimits = true;  // mantém a proteção, só aumenta o limite
+        options.MaxFieldCost = 15000;       // Quanto trabalho de resolver a query pede | Quantas “funções” o garçom precisa executar
+        options.MaxTypeCost = 15000;        // Quanto volume de dados a resposta pode ter | Quantos pratos cabem na bandeja
+        options.EnforceCostLimits = true;   // mantém a proteção, só aumenta o limite | Evita que o garçom sirva mais pratos do que cabem
         options.ApplyCostDefaults = true;
-        options.DefaultResolverCost = 10.0;
+        options.DefaultResolverCost = 10.0; // Valor padrão para cada resolver | Custo base para cada função
     })
     .ModifyOptions(o =>
     {
