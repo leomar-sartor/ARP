@@ -63,6 +63,9 @@ namespace ARP.Infra.Migrations
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("UsuarioId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Cpf")
@@ -72,7 +75,52 @@ namespace ARP.Infra.Migrations
 
                     b.HasIndex("SetorId");
 
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
+
                     b.ToTable("Colaboradores");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.ColaboradorEmpresa", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("ColaboradorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EmpresaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SetorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ColaboradorId", "EmpresaId")
+                        .IsUnique();
+
+                    b.HasIndex("EmpresaId", "SetorId");
+
+                    b.ToTable("ColaboradorEmpresas");
                 });
 
             modelBuilder.Entity("ARP.Entity.Cadastros.Empresa", b =>
@@ -102,6 +150,9 @@ namespace ARP.Infra.Migrations
                     b.Property<string>("NomeFantasia")
                         .HasColumnType("text");
 
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -114,6 +165,385 @@ namespace ARP.Infra.Migrations
                         .IsUnique();
 
                     b.ToTable("Empresas");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Permissao", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.ToTable("Permissoes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Ativo = true,
+                            Codigo = "empresa.visualizar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Visualizar empresas autorizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Ativo = true,
+                            Codigo = "empresa.criar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Cadastrar empresas no tenant ativo",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Ativo = true,
+                            Codigo = "empresa.editar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Editar empresas autorizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            Ativo = true,
+                            Codigo = "empresa.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar empresas autorizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 5L,
+                            Ativo = true,
+                            Codigo = "colaborador.visualizar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Visualizar colaboradores autorizados",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 6L,
+                            Ativo = true,
+                            Codigo = "colaborador.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar colaboradores autorizados",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 7L,
+                            Ativo = true,
+                            Codigo = "pesquisa_padronizada.criar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Criar pesquisas padronizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 8L,
+                            Ativo = true,
+                            Codigo = "pesquisa_padronizada.editar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Editar pesquisas padronizadas não publicadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 9L,
+                            Ativo = true,
+                            Codigo = "pesquisa_padronizada.publicar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Publicar pesquisas padronizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 10L,
+                            Ativo = true,
+                            Codigo = "pesquisa_padronizada.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar pesquisas padronizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 11L,
+                            Ativo = true,
+                            Codigo = "pesquisa.responder",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Responder pesquisas atribuídas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 12L,
+                            Ativo = true,
+                            Codigo = "pesquisa.acompanhar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Acompanhar indicadores operacionais",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 13L,
+                            Ativo = true,
+                            Codigo = "tenant.alternar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Alternar entre tenants autorizados",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 14L,
+                            Ativo = true,
+                            Codigo = "permissao.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar personas e permissões",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 15L,
+                            Ativo = true,
+                            Codigo = "setor.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar setores autorizados",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 16L,
+                            Ativo = true,
+                            Codigo = "categoria.gerenciar",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Descricao = "Gerenciar categorias de pesquisas padronizadas",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Persona", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.ToTable("Personas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Ativo = true,
+                            Codigo = "operador",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Nome = "Operador",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Ativo = true,
+                            Codigo = "colaborador",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Nome = "Colaborador",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Ativo = true,
+                            Codigo = "empresa",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Nome = "Empresa",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            Ativo = true,
+                            Codigo = "admin",
+                            CreatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Nome = "Admin",
+                            UpdatedAt = new DateTime(2026, 10, 14, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.PersonaPermissao", b =>
+                {
+                    b.Property<long>("PersonaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PermissaoId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("PersonaId", "PermissaoId");
+
+                    b.HasIndex("PermissaoId");
+
+                    b.ToTable("PersonasPermissoes");
+
+                    b.HasData(
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 1L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 2L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 3L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 4L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 5L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 6L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 7L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 8L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 9L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 10L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 12L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 13L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 15L
+                        },
+                        new
+                        {
+                            PersonaId = 1L,
+                            PermissaoId = 16L
+                        },
+                        new
+                        {
+                            PersonaId = 2L,
+                            PermissaoId = 11L
+                        },
+                        new
+                        {
+                            PersonaId = 2L,
+                            PermissaoId = 13L
+                        },
+                        new
+                        {
+                            PersonaId = 3L,
+                            PermissaoId = 1L
+                        },
+                        new
+                        {
+                            PersonaId = 3L,
+                            PermissaoId = 3L
+                        },
+                        new
+                        {
+                            PersonaId = 3L,
+                            PermissaoId = 12L
+                        },
+                        new
+                        {
+                            PersonaId = 3L,
+                            PermissaoId = 13L
+                        });
                 });
 
             modelBuilder.Entity("ARP.Entity.Cadastros.Setor", b =>
@@ -151,9 +581,39 @@ namespace ARP.Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmpresaId");
-
                     b.ToTable("Setores");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Tenant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tenants");
                 });
 
             modelBuilder.Entity("ARP.Entity.Cadastros.Usuario", b =>
@@ -234,6 +694,136 @@ namespace ARP.Infra.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("arp_user", (string)null);
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioEmpresa", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EmpresaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UsuarioId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.HasIndex("UsuarioId", "EmpresaId")
+                        .IsUnique();
+
+                    b.ToTable("UsuariosEmpresas");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioPersona", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("EmpresaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PersonaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UsuarioId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonaId");
+
+                    b.HasIndex("TenantId", "EmpresaId");
+
+                    b.HasIndex("UsuarioId", "PersonaId", "TenantId")
+                        .IsUnique()
+                        .HasFilter("\"EmpresaId\" IS NULL");
+
+                    b.HasIndex("UsuarioId", "PersonaId", "TenantId", "EmpresaId")
+                        .IsUnique()
+                        .HasFilter("\"EmpresaId\" IS NOT NULL");
+
+                    b.ToTable("UsuariosPersonas");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioTenant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UsuarioId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("UsuarioId", "TenantId")
+                        .IsUnique();
+
+                    b.ToTable("UsuariosTenants");
                 });
 
             modelBuilder.Entity("ARP.Entity.Exemplo.Endereco", b =>
@@ -420,6 +1010,9 @@ namespace ARP.Infra.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<long?>("EmpresaId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("EnviadoEm")
                         .HasColumnType("timestamp with time zone");
 
@@ -449,6 +1042,8 @@ namespace ARP.Infra.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ColaboradorId");
+
+                    b.HasIndex("EmpresaId");
 
                     b.HasIndex("PesquisaId");
 
@@ -482,6 +1077,15 @@ namespace ARP.Infra.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("PublicadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -490,7 +1094,48 @@ namespace ARP.Infra.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("Pesquisas");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Pesquisas.PesquisaEmpresa", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("EmpresaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PesquisaId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TenantId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PesquisaId", "EmpresaId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "EmpresaId");
+
+                    b.ToTable("PesquisaEmpresas");
                 });
 
             modelBuilder.Entity("ARP.Entity.Pesquisas.PesquisaRascunho", b =>
@@ -549,6 +1194,9 @@ namespace ARP.Infra.Migrations
 
                     b.Property<long?>("CategoriaId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("CategoriaNomeSnapshot")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -623,6 +1271,9 @@ namespace ARP.Infra.Migrations
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("Valor")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QuestaoId");
@@ -654,7 +1305,6 @@ namespace ARP.Infra.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Token")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -849,9 +1499,74 @@ namespace ARP.Infra.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ARP.Entity.Cadastros.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("ARP.Entity.Cadastros.Colaborador", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Empresa");
 
                     b.Navigation("Setor");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.ColaboradorEmpresa", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Colaborador", "Colaborador")
+                        .WithMany("EmpresasVinculadas")
+                        .HasForeignKey("ColaboradorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Empresa", "Empresa")
+                        .WithMany("ColaboradoresVinculados")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Setor", "Setor")
+                        .WithMany("ColaboradoresVinculados")
+                        .HasForeignKey("EmpresaId", "SetorId")
+                        .HasPrincipalKey("EmpresaId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Colaborador");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Setor");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Empresa", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Tenant", "Tenant")
+                        .WithMany("Empresas")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.PersonaPermissao", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Permissao", "Permissao")
+                        .WithMany("Personas")
+                        .HasForeignKey("PermissaoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Persona", "Persona")
+                        .WithMany("Permissoes")
+                        .HasForeignKey("PersonaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Permissao");
+
+                    b.Navigation("Persona");
                 });
 
             modelBuilder.Entity("ARP.Entity.Cadastros.Setor", b =>
@@ -863,6 +1578,79 @@ namespace ARP.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Empresa");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioEmpresa", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Empresa", "Empresa")
+                        .WithMany("UsuariosVinculados")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Usuario", "Usuario")
+                        .WithMany("EmpresasVinculadas")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioPersona", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Persona", "Persona")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("PersonaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Tenant", "Tenant")
+                        .WithMany("PersonasAtribuidas")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Usuario", "Usuario")
+                        .WithMany("PersonasAtribuidas")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Empresa", "Empresa")
+                        .WithMany("UsuariosPersonas")
+                        .HasForeignKey("TenantId", "EmpresaId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Persona");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.UsuarioTenant", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Tenant", "Tenant")
+                        .WithMany("UsuariosVinculados")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Usuario", "Usuario")
+                        .WithMany("TenantsVinculados")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("ARP.Entity.Exemplo.Endereco", b =>
@@ -903,6 +1691,11 @@ namespace ARP.Infra.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ARP.Entity.Cadastros.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ARP.Entity.Pesquisas.Pesquisa", "Pesquisa")
                         .WithMany("Convites")
                         .HasForeignKey("PesquisaId")
@@ -910,6 +1703,38 @@ namespace ARP.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Colaborador");
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Pesquisa");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Pesquisas.Pesquisa", b =>
+                {
+                    b.HasOne("ARP.Entity.Cadastros.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Pesquisas.PesquisaEmpresa", b =>
+                {
+                    b.HasOne("ARP.Entity.Pesquisas.Pesquisa", "Pesquisa")
+                        .WithMany("EmpresasVinculadas")
+                        .HasForeignKey("PesquisaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ARP.Entity.Cadastros.Empresa", "Empresa")
+                        .WithMany()
+                        .HasForeignKey("TenantId", "EmpresaId")
+                        .HasPrincipalKey("TenantId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
 
                     b.Navigation("Pesquisa");
                 });
@@ -1032,16 +1857,59 @@ namespace ARP.Infra.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ARP.Entity.Cadastros.Colaborador", b =>
+                {
+                    b.Navigation("EmpresasVinculadas");
+                });
+
             modelBuilder.Entity("ARP.Entity.Cadastros.Empresa", b =>
                 {
                     b.Navigation("Colaboradores");
 
+                    b.Navigation("ColaboradoresVinculados");
+
                     b.Navigation("Setores");
+
+                    b.Navigation("UsuariosPersonas");
+
+                    b.Navigation("UsuariosVinculados");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Permissao", b =>
+                {
+                    b.Navigation("Personas");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Persona", b =>
+                {
+                    b.Navigation("Permissoes");
+
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("ARP.Entity.Cadastros.Setor", b =>
                 {
                     b.Navigation("Colaboradores");
+
+                    b.Navigation("ColaboradoresVinculados");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Tenant", b =>
+                {
+                    b.Navigation("Empresas");
+
+                    b.Navigation("PersonasAtribuidas");
+
+                    b.Navigation("UsuariosVinculados");
+                });
+
+            modelBuilder.Entity("ARP.Entity.Cadastros.Usuario", b =>
+                {
+                    b.Navigation("EmpresasVinculadas");
+
+                    b.Navigation("PersonasAtribuidas");
+
+                    b.Navigation("TenantsVinculados");
                 });
 
             modelBuilder.Entity("ARP.Entity.Exemplo.Habilidade", b =>
@@ -1064,6 +1932,8 @@ namespace ARP.Infra.Migrations
             modelBuilder.Entity("ARP.Entity.Pesquisas.Pesquisa", b =>
                 {
                     b.Navigation("Convites");
+
+                    b.Navigation("EmpresasVinculadas");
 
                     b.Navigation("Questoes");
                 });

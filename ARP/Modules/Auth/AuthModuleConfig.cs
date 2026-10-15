@@ -14,6 +14,8 @@ namespace ARP.Modules.Auth
         public static IRequestExecutorBuilder AddAuthQueriesAndMutations(this IRequestExecutorBuilder builder)
         {
             builder.AddTypeExtension<AuthMutation>();
+            builder.AddTypeExtension<AccessControlQuery>();
+            builder.AddTypeExtension<AccessControlMutation>();
 
             return builder;
         }

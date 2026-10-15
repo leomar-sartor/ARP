@@ -1,8 +1,10 @@
 ﻿using ARP.Entity.Pesquisas;
 using ARP.Infra;
+using ARP.Modules.Auth;
 using ARP.Modules.Pesquisa.Types;
 using ARP.Service;
 using ARP.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
@@ -25,8 +27,13 @@ namespace ARP.Modules.Pesquisa
         [GraphQLDescription("Cadastrar um nova pesquisa")]
         public async Task<Entity.Pesquisas.Pesquisa> CreatePesquisa(
         PesquisaInput input,
-        [Service] Context context)
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
+        CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var entity = new Entity.Pesquisas.Pesquisa
             {
                 Nome = input.Nome,
@@ -43,7 +50,7 @@ namespace ARP.Modules.Pesquisa
 
             context.Pesquisas.Add(entity);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return entity;
         }
@@ -55,8 +62,13 @@ namespace ARP.Modules.Pesquisa
         public async Task<Entity.Pesquisas.Pesquisa?> UpdatePesquisa(
             long id,
             PesquisaInput input,
-            [Service] Context context)
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var entity = await context.Pesquisas
                 .Include(p => p.Questoes)
                     .ThenInclude(q => q.Opcoes)
@@ -80,12 +92,49 @@ namespace ARP.Modules.Pesquisa
 
             AddQuestoesFromInput(entity, input.Questoes);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return entity;
         }
 
+        [GraphQLDescription("Excluir uma pesquisa sem publicação, convites ou respostas")]
+        public async Task<bool> DeletePesquisa(
+            long id, [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
+        {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            var survey = await context.Pesquisas.Include(p => p.EmpresasVinculadas)
+                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            if (survey is null) return false;
+            if (survey.Tipo == Entity.Enums.TipoPesquisa.Padronizada)
+            {
+                await permissionAuthorizationService.RequireAsync(context, activeContext,
+                    ARP.Entity.Cadastros.PermissionCodes.StandardSurveyManage, cancellationToken);
+                if (survey.TenantId != activeContext.TenantId)
+                    throw new GraphQLException("Pesquisa fora do tenant ativo.");
+                if (!activeContext.IsAdmin && !survey.EmpresasVinculadas.Any())
+                    throw new GraphQLException("Pesquisa sem empresas autorizadas.");
+                await permissionAuthorizationService.RequireCompaniesAsync(context, activeContext,
+                    survey.EmpresasVinculadas.Select(p => p.EmpresaId),
+                    ARP.Entity.Cadastros.PermissionCodes.StandardSurveyManage, cancellationToken);
+                if (survey.PublicadaEm.HasValue)
+                    throw new GraphQLException("Pesquisas publicadas não podem ser excluídas.");
+            }
+            else await permissionAuthorizationService.RequireAdminAsync(activeContext);
+
+            if (await context.Convites.AnyAsync(c => c.PesquisaId == id, cancellationToken)
+                || await context.QuestaoRespostas.AnyAsync(r => r.Questao.PesquisaId == id, cancellationToken))
+                throw new GraphQLException("Não é possível excluir uma pesquisa que possui convites ou respostas.");
+            survey.DeletedAt = DateTime.UtcNow;
+            survey.UpdatedAt = survey.DeletedAt.Value;
+            await context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         [GraphQLDescription("Cadastrar uma resposta")]
+        [AllowAnonymous]
         public async Task<List<QuestaoResposta>> CreateResposta(
         RespostaInput input,
         [Service] Context context)
@@ -116,8 +165,57 @@ namespace ARP.Modules.Pesquisa
                 .Include(q => q.Opcoes)
                 .FirstOrDefaultAsync(q => q.Id == input.QuestaoId);
 
-            if (questao is not null)
-                if (questao.Tipo == Entity.Enums.TipoQuestao.Opcao)
+            if (questao is null || questao.PesquisaId != convite.PesquisaId)
+                throw new ArgumentException("A questão não pertence à pesquisa deste convite.");
+
+            if (convite.Pesquisa.Tipo == Entity.Enums.TipoPesquisa.Padronizada)
+            {
+                if (questao.CategoriaId is null
+                    || questao.Tipo != Entity.Enums.TipoQuestao.Opcao
+                    || questao.MultiplasRespostas
+                    || !PesquisaPadronizadaDefinition.HasFixedOptions(questao))
+                    throw new ArgumentException("A questão não atende ao formato padronizado publicado.");
+
+                if (!string.IsNullOrWhiteSpace(input.TextoResposta)
+                    || input.QuestaoOpcaoIds is not { Length: 1 })
+                    throw new ArgumentException("Selecione exatamente uma das cinco alternativas padronizadas.");
+
+                var selectedOption = questao.Opcoes
+                    .FirstOrDefault(option => option.Id == input.QuestaoOpcaoIds[0]);
+                if (selectedOption is null
+                    || !PesquisaPadronizadaDefinition.IsValidValue(selectedOption.Valor))
+                    throw new ArgumentException("A alternativa selecionada não pertence à escala padronizada.");
+
+                var existingResponses = await context.QuestaoRespostas
+                    .Where(response => response.Token == input.Token && response.QuestaoId == questao.Id)
+                    .OrderBy(response => response.Id)
+                    .ToListAsync();
+
+                QuestaoResposta response;
+                if (existingResponses.Count == 0)
+                {
+                    response = new QuestaoResposta
+                    {
+                        Token = input.Token,
+                        QuestaoId = questao.Id,
+                        QuestaoOpcaoId = selectedOption.Id
+                    };
+                    context.QuestaoRespostas.Add(response);
+                }
+                else
+                {
+                    response = existingResponses[0];
+                    response.QuestaoOpcaoId = selectedOption.Id;
+                    response.TextoResposta = null;
+                    if (existingResponses.Count > 1)
+                        context.QuestaoRespostas.RemoveRange(existingResponses.Skip(1));
+                }
+
+                await context.SaveChangesAsync();
+                return [response];
+            }
+
+            if (questao.Tipo == Entity.Enums.TipoQuestao.Opcao)
                 {
                     var opcoesValidas = questao.Opcoes.Select(o => o.Id).ToHashSet();
 
@@ -168,7 +266,7 @@ namespace ARP.Modules.Pesquisa
                     }
 
                 }
-                else if (questao.Tipo == Entity.Enums.TipoQuestao.Texto)
+            else if (questao.Tipo == Entity.Enums.TipoQuestao.Texto)
                 {
                     var resposta = new Entity.Pesquisas.QuestaoResposta
                     {
@@ -195,8 +293,12 @@ namespace ARP.Modules.Pesquisa
             [Service] Context context,
             [Service] IConfiguration config,
             [Service] EmailService serviceEmail,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
             CancellationToken ct)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, ct);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var pesquisa = await context.Pesquisas
                 .FirstOrDefaultAsync(p => p.Id == pesquisaId, ct)
                 ?? throw new ArgumentException("Pesquisa não encontrada.");
@@ -245,6 +347,7 @@ namespace ARP.Modules.Pesquisa
 
         // Disparar pesquisa para colaboradores
         [GraphQLDescription("Validar a pesquisa por colaborador")]
+        [AllowAnonymous]
         public async Task<bool> ValidatePesquisa(
             string token,
             string cpf,
@@ -278,17 +381,43 @@ namespace ARP.Modules.Pesquisa
 
         // Finalizar pesquisa
         [GraphQLDescription("Finalizar pesquisa e registrar conclusão")]
+        [AllowAnonymous]
         public async Task<bool> FinalizarPesquisa(
             string token,
             [Service] Context context,
             CancellationToken ct)
         {
             var convite = await context.Convites
+                .Include(c => c.Pesquisa)
                 .FirstOrDefaultAsync(c => c.Token == token, ct)
                 ?? throw new ArgumentException("Token inválido.");
 
+            if (convite.Status == Entity.Enums.Status.Completo)
+                throw new ArgumentException("Esta pesquisa já foi concluída.");
+
+            if (convite.Pesquisa.Tipo == Entity.Enums.TipoPesquisa.Padronizada)
+            {
+                var requiredQuestionIds = await context.Questoes
+                    .Where(question => question.PesquisaId == convite.PesquisaId && question.Obrigatoria)
+                    .Select(question => question.Id)
+                    .ToArrayAsync(ct);
+                var answeredQuestionIds = await context.QuestaoRespostas
+                    .Where(response => response.Token == token)
+                    .Select(response => response.QuestaoId)
+                    .Distinct()
+                    .ToArrayAsync(ct);
+                if (requiredQuestionIds.Except(answeredQuestionIds).Any())
+                    throw new ArgumentException("Responda todas as perguntas obrigatórias antes de concluir.");
+            }
+
             convite.Status = Entity.Enums.Status.Completo;
             convite.ConcluidoEm = DateTime.UtcNow;
+
+            var respostas = await context.QuestaoRespostas
+                .Where(response => response.Token == token)
+                .ToListAsync(ct);
+            foreach (var resposta in respostas)
+                resposta.Token = null;
 
             // Remove o rascunho
             var rascunho = await context.PesquisaRascunhos
@@ -301,6 +430,7 @@ namespace ARP.Modules.Pesquisa
         }
 
         [GraphQLDescription("Salvar progresso parcial da pesquisa")]
+        [AllowAnonymous]
         public async Task<bool> AutoSavePesquisa(
             string token,
             long ultimaQuestaoRespondidaId,
@@ -314,6 +444,11 @@ namespace ARP.Modules.Pesquisa
 
             if (convite.Status == Entity.Enums.Status.Completo)
                 throw new ArgumentException("Pesquisa já concluída.");
+
+            if (!await context.Questoes.AnyAsync(question => question.Id == ultimaQuestaoRespondidaId
+                && question.PesquisaId == convite.PesquisaId,
+                ct))
+                throw new ArgumentException("A questão de progresso não pertence à pesquisa do convite.");
 
             var rascunho = await context.PesquisaRascunhos
                 .FirstOrDefaultAsync(r => r.Token == token, ct);

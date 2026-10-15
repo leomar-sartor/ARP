@@ -1,6 +1,8 @@
 ﻿using ARP.Infra;
+using ARP.Modules.Auth;
 using ARP.Modules.Pesquisa.Loaders;
 using ARP.Modules.Pesquisa.Types;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Pesquisa
@@ -23,8 +25,13 @@ namespace ARP.Modules.Pesquisa
         [UseFiltering]
         [UseSorting]
         public async Task<IQueryable<Entity.Pesquisas.Pesquisa>> GetPesquisasAsync(
-            [Service] Context context)
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var result = context.Pesquisas
                 .Include(p => p.Questoes)
                 .Include(p => p.Convites)
@@ -39,14 +46,20 @@ namespace ARP.Modules.Pesquisa
         [GraphQLDescription("Buscar pesquisa por id")]
         public async Task<Entity.Pesquisas.Pesquisa?> GetPesquisaById(
             long id,
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
             PesquisaByIdDataLoader dataLoader,
             CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             return await dataLoader.LoadAsync(id, cancellationToken);
         }
 
         // Retomar ou iniciar pesquisa pelo token
         [GraphQLDescription("Buscar progresso da pesquisa pelo token do convite")]
+        [AllowAnonymous]
         public async Task<PesquisaSessaoPayload> GetSessaoPesquisa(
             string token,
             [Service] Context context,
@@ -66,7 +79,7 @@ namespace ARP.Modules.Pesquisa
                     .FirstOrDefaultAsync(r => r.Token == token, ct);
 
                 return new PesquisaSessaoPayload(
-                    Pesquisa: convite.Pesquisa,
+                    Pesquisa: PesquisaPublica.From(convite.Pesquisa),
                     UltimaQuestaoRespondidaId: rascunho?.UltimaQuestaoRespondidaId,
                     RespostasParciais: rascunho?.RespostasParciais
                 );
@@ -74,7 +87,7 @@ namespace ARP.Modules.Pesquisa
             catch
             {
                 return new PesquisaSessaoPayload(
-                    Pesquisa: new Entity.Pesquisas.Pesquisa(),
+                    Pesquisa: PesquisaPublica.From(new Entity.Pesquisas.Pesquisa()),
                     UltimaQuestaoRespondidaId: null,
                     RespostasParciais: null
                 );

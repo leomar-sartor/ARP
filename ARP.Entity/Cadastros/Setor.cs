@@ -11,5 +11,7 @@
         public Empresa Empresa { get; set; } = default!;
         public ICollection<Colaborador> Colaboradores { get; set; }
         = new List<Colaborador>();
+        public ICollection<ColaboradorEmpresa> ColaboradoresVinculados { get; set; }
+        = new List<ColaboradorEmpresa>();
     }
 }

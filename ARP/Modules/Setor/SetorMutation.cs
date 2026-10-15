@@ -1,5 +1,8 @@
 ﻿using ARP.Infra;
+using ARP.Entity.Cadastros;
+using ARP.Modules.Auth;
 using ARP.Modules.Setor.Types;
+using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Setor
 {
@@ -19,9 +22,19 @@ namespace ARP.Modules.Setor
         public async Task<Entity.Cadastros.Setor> CreateSetor(
             long EmpresaId,
             SetorInput input,
-            [Service] Context context)
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
         {
-            var empresa = await context.Empresas.FindAsync(EmpresaId);
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.SectorManage, cancellationToken);
+            await tenantContextResolver.EnsureCanAccessCompanyAsync(
+                context, activeContext, EmpresaId, cancellationToken);
+
+            var empresa = await context.Empresas
+                .FirstOrDefaultAsync(e => e.Id == EmpresaId, cancellationToken);
 
             if (empresa == null)
                 throw new ArgumentException("Empresa não encontrada");
@@ -36,7 +49,7 @@ namespace ARP.Modules.Setor
 
             context.Setores.Add(entity);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return entity;
         }
@@ -45,17 +58,27 @@ namespace ARP.Modules.Setor
         public async Task<Entity.Cadastros.Setor?> UpdateSetor(
         long id,
         SetorInput input,
-        [Service] Context context)
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
+        CancellationToken cancellationToken)
         {
-            var entity = await context.Setores.FindAsync(id);
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.SectorManage, cancellationToken);
+            var entity = await context.Setores
+                .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
             if (entity == null)
                 return null;
 
+            await tenantContextResolver.EnsureCanAccessCompanyAsync(
+                context, activeContext, entity.EmpresaId, cancellationToken);
+
             entity.Nome = input.Nome;
             entity.Descricao = input.Descricao;
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return entity;
         }
@@ -63,20 +86,31 @@ namespace ARP.Modules.Setor
         [GraphQLDescription("Remover uma setor")]
         public async Task<bool> RemoveSetor(
         long id,
-        [Service] Context context)
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
+        CancellationToken cancellationToken)
         {
-            var entity = await context.Setores.FindAsync(id);
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.SectorManage, cancellationToken);
+            var entity = await context.Setores
+                .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
             if (entity == null)
                 return false;
 
-            var existAnyColaborador = context.Colaboradores.Where(c => c.SetorId == id).Any();
+            await tenantContextResolver.EnsureCanAccessCompanyAsync(
+                context, activeContext, entity.EmpresaId, cancellationToken);
+
+            var existAnyColaborador = await context.ColaboradorEmpresas
+                .AnyAsync(c => c.SetorId == id && c.Ativo, cancellationToken);
             if (existAnyColaborador)
                 throw new ArgumentException("Não é possível remover um setor que possui colaboradores associados");
 
             entity.DeletedAt = DateTime.UtcNow;
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return true;
         }

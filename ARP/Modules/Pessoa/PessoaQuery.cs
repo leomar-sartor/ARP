@@ -1,4 +1,5 @@
 ﻿using ARP.Infra;
+using ARP.Modules.Auth;
 using ARP.Modules.Pessoa.Loaders;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +23,13 @@ namespace ARP.Modules.Pessoa
         [UseFiltering]
         [UseSorting]
         public async Task<List<Entity.Exemplo.Pessoa>> GetPessoasAsync(
-            [Service] Context context)
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             _logger.Log(LogLevel.Critical, "########################################");
             _logger.Log(LogLevel.Critical, "############## START SQL ###############");
 
@@ -45,8 +51,13 @@ namespace ARP.Modules.Pessoa
         [UseFiltering]
         [UseSorting]
         public async Task<IQueryable<Entity.Exemplo.Pessoa>> GetPessoasQueriableAsync(
-            [Service] Context context)
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             //_logger.Log(LogLevel.Information, "Exemplo Information"); -- VERDE
             //_logger.Log(LogLevel.Warning, "Exemplo Warning"); -- AMARELO
             //_logger.Log(LogLevel.Error, "Exemplo Error"); -- VERMELHO com PRETO
@@ -73,9 +84,14 @@ namespace ARP.Modules.Pessoa
         [GraphQLDescription("Buscar por pessoa")]
         public async Task<Entity.Exemplo.Pessoa?> GetPessoaById(
         long id,
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
         PessoaByIdDataLoader dataLoader,
         CancellationToken cancellationToken)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             return await dataLoader.LoadAsync(id, cancellationToken);
         }
 

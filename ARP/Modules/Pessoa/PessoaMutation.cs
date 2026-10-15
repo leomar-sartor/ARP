@@ -1,6 +1,7 @@
 ﻿using ARP.Entity;
 using ARP.Entity.Exemplo;
 using ARP.Infra;
+using ARP.Modules.Auth;
 using ARP.Modules.Pessoa.Types;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +23,12 @@ namespace ARP.Modules.Pessoa
         public async Task<Entity.Exemplo.Pessoa> CreatePessoa(
         PessoaInput input,
         [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
         CancellationToken ct)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, ct);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var entity = new Entity.Exemplo.Pessoa
             {
                 Nome = input.Nome
@@ -100,8 +105,12 @@ namespace ARP.Modules.Pessoa
             long Id,
             PessoaInput input,
             [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
             CancellationToken ct)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, ct);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             var entity = await context.Pessoas
                    .Include(p => p.PessoaHabilidades)
                        .ThenInclude(ph => ph.Habilidade)
@@ -194,8 +203,12 @@ namespace ARP.Modules.Pessoa
         public async Task<bool> RemovePessoa(
             long id,
             [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
             CancellationToken ct)
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, ct);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
             await using var transaction = await context.Database.BeginTransactionAsync(ct);
 
             try

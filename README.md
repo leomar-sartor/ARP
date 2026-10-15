@@ -58,7 +58,7 @@ dotnet ef --version
 
 ### Sobre Configurações
 
-Segredos (`CONNECTION_STRING`, `JWT_KEY`, `KEY_HMAC`, `SMTP_USER`, `SMTP_PASSWORD`) **não** devem ficar em `appsettings.json` nem em `launchSettings.json`.
+Segredos (`CONNECTION_STRING`, `JWT_KEY`, `KEY_HMAC`, `SMTP_USER`, `SMTP_PASSWORD`) e a configuração de bootstrap (`GLOBAL_ADMIN_EMAIL`) **não** devem ficar em `appsettings.json` nem em `launchSettings.json`.
 
 | Ambiente | Onde configurar |
 |----------|-----------------|
@@ -75,11 +75,30 @@ dotnet user-secrets set "KEY_HMAC" "outra-chave-longa-aleatoria" --project ARP
 dotnet user-secrets set "JWT_EXPIRATION_HOURS" "8" --project ARP
 dotnet user-secrets set "SMTP_USER" "noreply@seu-dominio.com" --project ARP
 dotnet user-secrets set "SMTP_PASSWORD" "sua-senha-smtp" --project ARP
+dotnet user-secrets set "GLOBAL_ADMIN_EMAIL" "admin@seu-dominio.com" --project ARP
 ```
+
+Após aplicar as migrações, a inicialização executa `Seeds/SeedAccess.cs`. O catálogo de personas e permissões continua sendo cadastrado pelas migrações. O seed garante a role global `Admin`, o administrador configurado e, em Development, contas para testar cada persona. Ele pode ser executado novamente sem duplicar os vínculos e sem redefinir senhas existentes.
+
+Em Development, `appsettings.Development.json` configura o Admin `leomar_sartor@unochapeco.edu.br` e habilita `operador@arp.test`, `empresa@arp.test` e `colaborador@arp.test`. Em um banco novo, a senha inicial do Admin é `Admin@123` e a das três contas é `Teste@123`. Contas já existentes mantêm suas senhas. As contas de teste usam a primeira empresa ativa; em um banco vazio, o seed cria tenant, empresa e setor de teste. O Colaborador recebe também os vínculos necessários para participar de pesquisas.
+
+Configurações do seed (podem ser sobrescritas por User Secrets ou variáveis de ambiente):
+
+| Configuração | Uso |
+|---|---|
+| `GLOBAL_ADMIN_EMAIL` ou `Seeds:AdminEmail` | Conta que recebe Admin global; `GLOBAL_ADMIN_EMAIL` tem prioridade |
+| `Seeds:AdminPassword` | Obrigatória somente para criar um Admin que ainda não existe |
+| `Seeds:TestUsersEnabled` | Liga/desliga contas de teste; só é considerada em Development |
+| `Seeds:TestPassword` | Senha inicial das novas contas de teste |
+| `Seeds:CompanyId` | Empresa específica para os vínculos de teste; opcional |
+
+Em produção, configure explicitamente `GLOBAL_ADMIN_EMAIL` e, caso a conta ainda não exista, `Seeds__AdminPassword` no Secret Store. As contas de teste não são criadas fora de Development, mesmo com `Seeds__TestUsersEnabled=true`. Nenhuma senha é registrada nos logs.
+
+O seed também vincula `operador@arp.test` ao `Tenant de testes 2`, com empresa, setor e colaborador próprios. A troca de contexto fica disponível no cabeçalho. O Admin possui contexto de administração global, lista todas as empresas, setores e colaboradores e administra tenants em `/dashboard/tenants`. Operadores consultam somente os cadastros autorizados no contexto ativo. Tenants com empresas ou usuários vinculados não podem ser removidos.
 
 Ou via Visual Studio: botão direito no projeto `ARP` → **Manage User Secrets**.
 
-Variáveis de ambiente equivalentes (Render/Docker): `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `KEY_HMAC`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `CORS_ALLOWED_ORIGINS`.
+Variáveis de ambiente equivalentes (Render/Docker): `CONNECTION_STRING`, `JWT_KEY`, `JWT_EXPIRATION_HOURS`, `KEY_HMAC`, `GLOBAL_ADMIN_EMAIL`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_HOST`, `SMTP_PORT`, `CORS_ALLOWED_ORIGINS`.
 ## ☁️ ACESSOS
 
 Credenciais de painéis (Render, Neon, e-mail/senha) **não** devem ser commitadas. Use o gerenciador de senhas / secret store do time.

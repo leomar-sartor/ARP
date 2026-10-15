@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,9 @@ builder.Services.AddCors(
     );
 
 builder.Services.AddAuthModule();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TenantContextResolver>();
+builder.Services.AddScoped<PermissionAuthorizationService>();
 
 var jwtKey =
     Environment.GetEnvironmentVariable("JWT_KEY")
@@ -84,7 +88,11 @@ builder.Services.AddPooledDbContextFactory<Context>(options =>
 });
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters =
@@ -195,7 +203,10 @@ app.UseGraphQLGraphiQL("/graphiql");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<Context>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+
 }
+
+await ARP.Seeds.SeedAccess.SeedAsync(app.Services, builder.Configuration, isDevelopment);
 
 app.Run();

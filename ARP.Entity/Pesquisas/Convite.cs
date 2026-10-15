@@ -24,6 +24,9 @@ namespace ARP.Entity.Pesquisas
 
         public Pesquisa Pesquisa { get; set; } = default!;
 
+        public long? EmpresaId { get; set; }
+        public Empresa? Empresa { get; set; }
+
         public Status Status { get; set; } = Status.Pendente;
 
     }

@@ -17,6 +17,7 @@ namespace ARP.Entity.Pesquisas
 
         public long? CategoriaId { get; set; }
         public Categoria? Categoria { get; set; }
+        public string? CategoriaNomeSnapshot { get; set; }
 
         public long PesquisaId { get; set; }
         public Pesquisa Pesquisa { get; set; } = default!;

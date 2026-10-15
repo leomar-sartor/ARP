@@ -48,6 +48,7 @@ namespace ARP.Modules.Auth
                     return new LoginPayload(false, "Senha inválida", null, null);
 
                 var accessToken = TokenService.GenerateJwt(user, config);
+                var roles = (await userManager.GetRolesAsync(user)).ToArray();
 
                 var bytes = RandomNumberGenerator.GetBytes(64);
                 var nRefreshToken = Convert.ToBase64String(bytes)
@@ -104,9 +105,8 @@ namespace ARP.Modules.Auth
                         Id: user.Id,
                         Email: user.Email,
                         UserName: user.UserName,
-                        Roles: new string[] { "Admin", "User" },
+                        Roles: roles,
                         EmpresaId: 0
-                        //(await userManager.GetRolesAsync(user)).ToArray()
                     )
                 );
             }
@@ -157,6 +157,7 @@ namespace ARP.Modules.Auth
 
             var user = storedToken.User;
             var newAccessToken = TokenService.GenerateJwt(user, config);
+            var roles = (await userManager.GetRolesAsync(user)).ToArray();
 
             #region SE QUISER MAIS SEGURANÇA
             // Revoga o token antigo -AKI
@@ -216,9 +217,8 @@ namespace ARP.Modules.Auth
                         Id: user.Id,
                         Email: user.Email,
                         UserName: user.UserName,
-                        Roles: new string[] { "Admin", "User" },
+                        Roles: roles,
                         EmpresaId: 0
-                        //(await userManager.GetRolesAsync(user)).ToArray()
                     )
             );
         }
@@ -253,9 +253,15 @@ namespace ARP.Modules.Auth
         public async Task<RegisterUserPayload> RegisterUserAsync(
             RegisterUserInput input,
             [Service] UserManager<Usuario> userManager,
-            [Service] Context context
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken
         )
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAdminAsync(activeContext);
+
             _logger.Log(LogLevel.Information, "Registrando");
 
             var cpf = Utils.CpfHelper.OnlyDigits(input.Cpf);
@@ -281,6 +287,17 @@ namespace ARP.Modules.Auth
                 );
             }
 
+            var empresa = await context.Empresas
+                .FirstOrDefaultAsync(company => company.Id == input.EmpresaId, cancellationToken);
+            if (empresa is null)
+                return new RegisterUserPayload(null, false, "Empresa não encontrada.");
+
+            var collaboratorProfile = await context.Colaboradores
+                .Include(collaborator => collaborator.EmpresasVinculadas)
+                .FirstOrDefaultAsync(collaborator => collaborator.Cpf == cpf
+                    && collaborator.UsuarioId == null,
+                    cancellationToken);
+
             var user = new Usuario
             {
                 Cpf = cpf,
@@ -303,6 +320,38 @@ namespace ARP.Modules.Auth
                         errors
                     );
                 }
+
+                if (collaboratorProfile is not null)
+                    collaboratorProfile.UsuarioId = user.Id;
+
+                var companyIds = collaboratorProfile?.EmpresasVinculadas
+                    .Where(membership => membership.Ativo)
+                    .Select(membership => membership.EmpresaId)
+                    .Append(empresa.Id)
+                    .Distinct()
+                    .ToArray()
+                    ?? [empresa.Id];
+                var linkedCompanies = await context.Empresas
+                    .Where(company => companyIds.Contains(company.Id))
+                    .ToListAsync(cancellationToken);
+
+                foreach (var linkedCompany in linkedCompanies)
+                {
+                    context.UsuariosEmpresas.Add(new UsuarioEmpresa
+                    {
+                        UsuarioId = user.Id,
+                        EmpresaId = linkedCompany.Id,
+                        UserId = activeContext.UserId
+                    });
+                    context.UsuariosTenants.Add(new UsuarioTenant
+                    {
+                        UsuarioId = user.Id,
+                        TenantId = linkedCompany.TenantId,
+                        UserId = activeContext.UserId
+                    });
+                }
+
+                await context.SaveChangesAsync(cancellationToken);
 
                 return new RegisterUserPayload(
                     user.Id,

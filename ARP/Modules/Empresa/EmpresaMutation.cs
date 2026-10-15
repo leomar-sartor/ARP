@@ -1,6 +1,9 @@
 ﻿using ARP.Infra;
+using ARP.Entity.Cadastros;
+using ARP.Modules.Auth;
 using ARP.Modules.Empresa.Types;
 using ARP.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace ARP.Modules.Empresa
 {
@@ -19,9 +22,17 @@ namespace ARP.Modules.Empresa
         [GraphQLDescription("Cadastra uma nova empresa")]
         public async Task<Entity.Cadastros.Empresa> CreateEmpresa(
             EmpresaInput input,
-            [Service] Context context
+            [Service] Context context,
+            [Service] TenantContextResolver tenantContextResolver,
+            [Service] PermissionAuthorizationService permissionAuthorizationService,
+            CancellationToken cancellationToken
             )
         {
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.CompanyCreate, cancellationToken);
+            var tenantId = activeContext.TenantId
+                ?? throw new GraphQLException("Selecione um tenant para cadastrar a empresa.");
 
             _logger.Log(LogLevel.Information, "Cadastrando Empresa");
 
@@ -33,6 +44,7 @@ namespace ARP.Modules.Empresa
                 Cnpj = CnpjHelper.OnlyLettersAndDigits(input.CNPJ),
                 NomeFantasia = input.NomeFantasia,
                 Descricao = input.Descricao,
+                TenantId = tenantId,
                 Ativo = true
             };
 
@@ -54,12 +66,22 @@ namespace ARP.Modules.Empresa
         public async Task<Entity.Cadastros.Empresa?> UpdateEmpresa(
         long id,
         EmpresaInput input,
-        [Service] Context context)
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
+        CancellationToken cancellationToken)
         {
-            var entity = await context.Empresas.FindAsync(id);
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.CompanyEdit, cancellationToken);
+            var entity = await context.Empresas
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
             if (entity == null)
                 return null;
+
+            await tenantContextResolver.EnsureCanAccessCompanyAsync(
+                context, activeContext, entity.Id, cancellationToken);
 
             if (!CnpjHelper.IsValidCnpj(input.CNPJ))
                 throw new ArgumentException("CNPJ inválido");
@@ -76,19 +98,31 @@ namespace ARP.Modules.Empresa
         [GraphQLDescription("Remover uma empresa")]
         public async Task<bool> RemoveEmpresa(
         long id,
-        [Service] Context context)
+        [Service] Context context,
+        [Service] TenantContextResolver tenantContextResolver,
+        [Service] PermissionAuthorizationService permissionAuthorizationService,
+        CancellationToken cancellationToken)
         {
-            var entity = await context.Empresas.FindAsync(id);
+            var activeContext = await tenantContextResolver.ResolveAsync(context, cancellationToken);
+            await permissionAuthorizationService.RequireAsync(
+                context, activeContext, PermissionCodes.CompanyManage, cancellationToken);
+            var entity = await context.Empresas
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
             if (entity == null)
                 return false;
+
+            await tenantContextResolver.EnsureCanAccessCompanyAsync(
+                context, activeContext, entity.Id, cancellationToken);
 
             var existAnySetor = context.Setores.Where(s => s.EmpresaId == id).Any();
             if (existAnySetor)
                 throw new ArgumentException("Não é possível remover uma empresa que possui setores associados");
 
             var existAnyUser = context.Users.Where(u => u.EmpresaId == id).Any();
-            if (existAnyUser)
+            var hasMemberships = await context.UsuariosEmpresas
+                .AnyAsync(u => u.EmpresaId == id && u.Ativo, cancellationToken);
+            if (existAnyUser || hasMemberships)
                 throw new ArgumentException("Não é possível remover uma empresa que possui usuários associados");
 
             entity.DeletedAt = DateTime.UtcNow;

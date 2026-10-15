@@ -8,6 +8,10 @@ namespace ARP.Modules.Pesquisa
         {
             builder.AddTypeExtension<PesquisaQuery>();
             builder.AddTypeExtension<PesquisaMutation>();
+            builder.AddTypeExtension<PesquisaPadronizadaQuery>();
+            builder.AddTypeExtension<PesquisaPadronizadaMutation>();
+            builder.AddTypeExtension<PesquisaOperationsQuery>();
+            builder.AddTypeExtension<MinhasPesquisasQuery>();
             return builder;
         }
     }

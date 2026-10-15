@@ -8,11 +8,16 @@
 
         public string Email { get; set; } = default!;
 
+        public long? UsuarioId { get; set; }
+        public Usuario? Usuario { get; set; }
+
         public long SetorId { get; set; }
         public Setor Setor { get; set; } = default!;
 
         public long EmpresaId { get; set; }
         public Empresa Empresa { get; set; } = default!;
         public bool Ativo { get; set; } = true;
+
+        public ICollection<ColaboradorEmpresa> EmpresasVinculadas { get; set; } = new List<ColaboradorEmpresa>();
     }
 }

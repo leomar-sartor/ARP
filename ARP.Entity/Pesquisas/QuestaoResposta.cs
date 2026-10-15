@@ -2,7 +2,7 @@
 {
     public class QuestaoResposta : Base
     {
-        public string Token { get; set; } = default!;
+        public string? Token { get; set; }
 
         public string? TextoResposta { get; set; }
 
